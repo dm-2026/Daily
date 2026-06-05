@@ -508,7 +508,7 @@ async function sendDigestEmail(triggeredBy) {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: `You are an email sending assistant. The user wants to send an HTML email digest. Use the Gmail MCP tool to send the email. Send it exactly as instructed.`,
         messages: [{
@@ -670,7 +670,7 @@ No changes? Use ACTIONS:[]END_ACTIONS. Dates must be YYYY-MM-DD.`;
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         system: systemPrompt,
         messages: [{ role: 'user', content: text }]
