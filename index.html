@@ -8,13 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd6;--text:#1a1816;--muted:#7a756e;--faint:#b0aba3;--accent:#2d5a3d;--accent-l:#e8f0eb;--accent-t:#1e3d29;--blue:#1a4a7a;--blue-l:#e6eef6;--amber:#8a5a00;--amber-l:#fdf3e0;--red:#8a2222;--red-l:#fceaea;--purple:#5a3a8a;--purple-l:#f0eaf8;--r:12px;--rs:8px}
+[data-theme="dark"]{
+  --bg:#141414;--surface:#1e1e1e;--surface2:#252525;--border:#333;
+  --text:#e8e4df;--muted:#9a9590;--faint:#555;
+  --accent:#1D9E75;--accent-l:#0a3328;--accent-t:#5DCAA5;
+  --blue:#378ADD;--blue-l:#0c2a44;--amber:#EF9F27;--amber-l:#2d1e08;
+  --red:#E24B4A;--red-l:#2d1010;--purple:#7F77DD;--purple-l:#1e1a3d;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 /* Header */
 header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:10px;flex-wrap:wrap}
 .logo{font-size:16px;font-weight:600;color:var(--text)}.logo span{color:var(--accent)}
-.header-tabs{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
-.header-tabs::-webkit-scrollbar{display:none}
+.header-tabs{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.proj-scroll{display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;flex:1;min-width:0;padding-bottom:2px}
+.proj-scroll::-webkit-scrollbar{height:3px}
+.proj-scroll::-webkit-scrollbar-track{background:transparent}
+.proj-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 .ptab{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:.5px solid transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:5px}
 .ptab:hover{background:var(--surface2)}.ptab.active{background:var(--accent);color:#fff}
 .ptab .cx{opacity:0;font-size:13px}.ptab:hover .cx{opacity:.7}
@@ -133,6 +143,52 @@ header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:spa
 .ma{display:flex;gap:7px;justify-content:flex-end;margin-top:.875rem}
 .btn{padding:6px 14px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--muted)}
 .btn:hover{background:var(--surface2)}.btn.p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.p:hover{background:var(--accent-t)}
+/* Focus mode */
+.focus-overlay{position:fixed;inset:0;background:#141414;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;opacity:0;transition:opacity .3s}
+.focus-overlay.show{opacity:1}
+.focus-inner{width:100%;max-width:680px;display:flex;flex-direction:column;gap:1.5rem}
+.focus-task{font-size:28px;font-weight:600;color:#e8e4df;line-height:1.3}
+.focus-meta{font-size:14px;color:#555;display:flex;align-items:center;gap:12px}
+.focus-timer{font-size:48px;font-weight:600;font-family:"DM Mono",monospace;color:#1D9E75;text-align:center;letter-spacing:2px}
+.focus-notes{width:100%;min-height:180px;background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:16px;font-family:"DM Sans",sans-serif;font-size:15px;color:#e8e4df;outline:none;resize:none;line-height:1.7}
+.focus-notes:focus{border-color:#1D9E75}
+.focus-notes::placeholder{color:#444}
+.focus-actions{display:flex;gap:10px;justify-content:center}
+.focus-btn{padding:10px 24px;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:1px solid #333;background:#252525;color:#9a9590;transition:all .15s}
+.focus-btn:hover{background:#2d2d2d;color:#e8e4df}
+.focus-btn.done{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.focus-btn.exit{background:transparent;color:#555}
+.focus-exit-hint{position:fixed;top:20px;right:20px;font-size:12px;color:#333;font-family:"DM Mono",monospace}
+.focus-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+
+/* Lofi player */
+.lofi-wrap{position:relative}
+.lofi-btn{background:transparent;border:.5px solid var(--border);border-radius:var(--rs);padding:5px 11px;font-family:"DM Sans",sans-serif;font-size:14px;cursor:pointer;color:var(--muted);transition:all .15s;line-height:1}
+.lofi-btn:hover{background:var(--surface2)}
+.lofi-btn.playing{background:var(--accent-l);border-color:var(--accent);color:var(--accent-t)}
+.lofi-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.12);width:240px;z-index:200;padding:1rem}
+.lofi-dropdown.hidden{display:none}
+.lofi-track{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:background .1s}
+.lofi-track:hover{background:var(--surface2)}
+.lofi-track.active{background:var(--accent-l)}
+.lofi-track-info{flex:1}
+.lofi-track-name{font-size:13px;font-weight:500;color:var(--text)}
+.lofi-track-desc{font-size:11px;color:var(--faint)}
+.lofi-controls{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:.5px solid var(--border)}
+.lofi-vol{flex:1;height:3px;accent-color:var(--accent)}
+.lofi-now{font-size:11px;color:var(--muted);margin-bottom:8px;min-height:14px}
+.lofi-play-btn{width:32px;height:32px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Weekly summary */
+.summary-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center;padding:1rem}
+.summary-modal{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);width:100%;max-width:560px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.summary-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.summary-body{padding:1.5rem;overflow-y:auto;flex:1;font-size:14px;line-height:1.7;color:var(--text)}
+.summary-body h4{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:1rem 0 6px;padding-top:1rem;border-top:.5px solid var(--border)}
+.summary-body h4:first-child{margin-top:0;padding-top:0;border-top:none}
+.summary-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:flex-end}
+.summary-loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:2rem 0;justify-content:center}
+
 /* Clock widget */
 .clock-wrap{position:relative}
 .clock-btn{background:transparent;border:.5px solid var(--border);border-radius:var(--rs);padding:5px 11px;font-family:"DM Sans",sans-serif;font-size:14px;cursor:pointer;color:var(--muted);transition:all .15s;line-height:1}
@@ -177,9 +233,9 @@ header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:spa
 <header>
   <div class="logo">my<span>dashboard</span></div>
   <div class="header-tabs">
-    <div class="ptab active" onclick="switchPage('home')">🏠 Home</div>
-    <div id="proj-tabs"></div>
-    <button class="add-proj" onclick="addProject()" title="New project">+</button>
+    <div class="ptab active" onclick="switchPage('home')" style="flex-shrink:0">🏠 Home</div>
+    <div class="proj-scroll" id="proj-tabs"></div>
+    <button class="add-proj" onclick="addProject()" title="New project" style="flex-shrink:0">+</button>
   </div>
   <div class="hright">
     <div class="date-d" id="date-d"></div>
@@ -222,6 +278,20 @@ header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:spa
       </div>
     </div>
     <button class="hbtn" onclick="requestNotifications()" id="notif-btn">🔔 Notify</button>
+    <button class="hbtn" id="theme-btn" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+    <button class="hbtn" onclick="openWeeklySummary()" title="Weekly AI summary">🧠 Week</button>
+    <div class="lofi-wrap" id="lofi-wrap">
+      <button class="lofi-btn" id="lofi-btn" onclick="toggleLofi()" title="Lofi music">🎵</button>
+      <div class="lofi-dropdown hidden" id="lofi-dropdown">
+        <div class="lofi-now" id="lofi-now">Not playing</div>
+        <div id="lofi-tracks"></div>
+        <div class="lofi-controls">
+          <button class="lofi-play-btn" id="lofi-play-btn" onclick="toggleLofiPlay()">▶</button>
+          <input type="range" class="lofi-vol" id="lofi-vol" min="0" max="1" step="0.05" value="0.6" oninput="setLofiVol(this.value)"/>
+          <span style="font-size:11px;color:var(--faint)" id="lofi-vol-label">60%</span>
+        </div>
+      </div>
+    </div>
     <button class="hbtn pri" id="digest-btn" onclick="sendDigestNow()">✉ Digest</button>
     <button class="hbtn" onclick="openEmailJSSetup()" title="Email setup">⚙ Email setup</button>
   </div>
@@ -262,6 +332,40 @@ header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:spa
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Focus mode overlay -->
+<div class="focus-overlay" id="focus-overlay" style="display:none">
+  <div class="focus-exit-hint">ESC to exit</div>
+  <div class="focus-inner">
+    <div>
+      <div id="focus-task-title" class="focus-task"></div>
+      <div id="focus-task-meta" class="focus-meta"></div>
+    </div>
+    <div class="focus-timer" id="focus-elapsed">00:00</div>
+    <textarea class="focus-notes" id="focus-notes" placeholder="Write your notes here — they'll be saved to this task when you're done..."></textarea>
+    <div class="focus-actions">
+      <button class="focus-btn exit" onclick="exitFocus(false)">← Exit</button>
+      <button class="focus-btn" onclick="toggleFocusTimer()" id="focus-timer-btn">⏸ Pause</button>
+      <button class="focus-btn done" onclick="exitFocus(true)">✓ Mark done & exit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Weekly summary overlay -->
+<div class="summary-overlay" id="summary-overlay" style="display:none" onclick="if(event.target===this)closeSummary()">
+  <div class="summary-modal">
+    <div class="summary-header">
+      <span style="font-size:15px;font-weight:600">🧠 Weekly summary</span>
+      <button class="iab" onclick="closeSummary()" style="font-size:18px;opacity:1">×</button>
+    </div>
+    <div class="summary-body" id="summary-body">
+      <div class="summary-loading"><div class="typing"><span></span><span></span><span></span></div> Claude is reviewing your week...</div>
+    </div>
+    <div class="summary-footer">
+      <button class="btn p" onclick="closeSummary()">Close</button>
+    </div>
+  </div>
+</div>
 <div class="ov" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
   <div class="modal" id="mc"></div>
 </div>
@@ -346,8 +450,9 @@ function todoItem(t,i,scope){
       ${t.due?`<div class="im">📅 ${fmtDate(t.due)}${over?` · <span style="color:var(--red);font-weight:600">Overdue</span>`:''}</div>`:''}
     </div>
     <div class="ia">
+      <button class="iab" onclick="enterFocus(${i},'${scope}')" title="Focus mode">🎯</button>
       <button class="iab" onclick="editTodo(${i},'${scope}')" title="Edit">✏</button>
-      <button class="iab" onclick="cycPri(${i},'${scope}')" title="Priority">🎯</button>
+      <button class="iab" onclick="cycPri(${i},'${scope}')" title="Priority">●</button>
       <button class="iab" onclick="delTodo(${i},'${scope}')">×</button>
     </div>
   </div>`;
@@ -904,6 +1009,192 @@ async function sendMsg(){
   document.getElementById('csb').disabled=false;
 }
 
+
+// ── FOCUS MODE ────────────────────────────────────────────────────────
+let focusScope=null, focusIdx=null, focusInterval=null, focusSeconds=0, focusPaused=false;
+
+function enterFocus(i, scope){
+  const t = getScope(scope).todos[i];
+  if(!t) return;
+  focusScope=scope; focusIdx=i; focusSeconds=0; focusPaused=false;
+  document.getElementById('focus-task-title').textContent = t.text;
+  const meta = [];
+  if(t.priority) meta.push(t.priority+' priority');
+  if(t.due) meta.push('Due '+fmtDate(t.due));
+  if(t.projectTag) meta.push('📁 '+t.projectTag);
+  document.getElementById('focus-task-meta').innerHTML = meta.join(' · ');
+  document.getElementById('focus-notes').value = t.focusNotes||'';
+  document.getElementById('focus-elapsed').textContent = '00:00';
+  document.getElementById('focus-timer-btn').textContent = '⏸ Pause';
+  const overlay = document.getElementById('focus-overlay');
+  overlay.style.display='flex';
+  setTimeout(()=>overlay.classList.add('show'),10);
+  document.getElementById('focus-notes').focus();
+  focusInterval = setInterval(()=>{
+    if(!focusPaused){
+      focusSeconds++;
+      const m=Math.floor(focusSeconds/60);
+      const s=focusSeconds%60;
+      document.getElementById('focus-elapsed').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    }
+  },1000);
+  document.addEventListener('keydown', focusEscListener);
+}
+
+function focusEscListener(e){
+  if(e.key==='Escape') exitFocus(false);
+}
+
+function toggleFocusTimer(){
+  focusPaused=!focusPaused;
+  document.getElementById('focus-timer-btn').textContent=focusPaused?'▶ Resume':'⏸ Pause';
+}
+
+function exitFocus(markDone){
+  clearInterval(focusInterval);
+  document.removeEventListener('keydown', focusEscListener);
+  const overlay=document.getElementById('focus-overlay');
+  overlay.classList.remove('show');
+  setTimeout(()=>overlay.style.display='none', 300);
+  if(focusScope!==null && focusIdx!==null){
+    const t=getScope(focusScope).todos[focusIdx];
+    if(t){
+      t.focusNotes=document.getElementById('focus-notes').value;
+      if(markDone) t.done=true;
+      // sync mirror
+      if(focusScope!=='home' && t.projectId){
+        const proj=state.projects.find(p=>p.id===t.projectId);
+        if(proj){const m=proj.todos.find(x=>x.text===t.text);if(m){m.focusNotes=t.focusNotes;if(markDone)m.done=true;}}
+      }
+      saveState(); render();
+    }
+  }
+  focusScope=null; focusIdx=null;
+}
+
+// ── LOFI PLAYER ───────────────────────────────────────────────────────
+const LOFI_TRACKS = [
+  {name:'Lofi Hip Hop',desc:'Chill beats to study to',url:'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&controls=0',yt:true},
+  {name:'Rain & Thunder',desc:'Cosy rainy ambience',url:'https://www.youtube-nocookie.com/embed/mPZkdNFkNps?autoplay=1&controls=0',yt:true},
+  {name:'Deep Focus',desc:'Minimal ambient tones',url:'https://www.youtube-nocookie.com/embed/WPni755-Krg?autoplay=1&controls=0',yt:true},
+  {name:'Coffee Shop',desc:'Warm café background',url:'https://www.youtube-nocookie.com/embed/h2zkV-l_more?autoplay=1&controls=0',yt:true},
+];
+let lofiOpen=false, lofiPlaying=false, lofiTrack=0, lofiFrame=null;
+
+function toggleLofi(){
+  lofiOpen=!lofiOpen;
+  document.getElementById('lofi-dropdown').classList.toggle('hidden',!lofiOpen);
+  if(lofiOpen){renderLofiTracks();document.addEventListener('click',lofiOutsideClick,true);}
+  else document.removeEventListener('click',lofiOutsideClick,true);
+}
+function lofiOutsideClick(e){
+  if(!document.getElementById('lofi-wrap').contains(e.target)){
+    lofiOpen=false;
+    document.getElementById('lofi-dropdown').classList.add('hidden');
+    document.removeEventListener('click',lofiOutsideClick,true);
+  }
+}
+function renderLofiTracks(){
+  document.getElementById('lofi-tracks').innerHTML=LOFI_TRACKS.map((t,i)=>`
+    <div class="lofi-track ${i===lofiTrack?'active':''}" onclick="selectLofiTrack(${i})">
+      <span style="font-size:18px">${['🎵','🌧','🔮','☕'][i]}</span>
+      <div class="lofi-track-info">
+        <div class="lofi-track-name">${t.name}</div>
+        <div class="lofi-track-desc">${t.desc}</div>
+      </div>
+      ${i===lofiTrack&&lofiPlaying?'<span style="color:var(--accent);font-size:12px">▶</span>':''}
+    </div>`).join('');
+}
+function selectLofiTrack(i){
+  lofiTrack=i;
+  if(lofiPlaying) playLofi();
+  else { renderLofiTracks(); }
+}
+function toggleLofiPlay(){
+  if(lofiPlaying) stopLofi();
+  else playLofi();
+}
+function playLofi(){
+  lofiPlaying=true;
+  // Use iframe embed approach
+  let container=document.getElementById('lofi-iframe-container');
+  if(!container){container=document.createElement('div');container.id='lofi-iframe-container';container.style.display='none';document.body.appendChild(container);}
+  container.innerHTML=`<iframe id="lofi-frame" src="${LOFI_TRACKS[lofiTrack].url}" allow="autoplay" style="width:1px;height:1px;position:absolute;left:-9999px"></iframe>`;
+  document.getElementById('lofi-now').textContent='▶ '+LOFI_TRACKS[lofiTrack].name;
+  document.getElementById('lofi-play-btn').textContent='⏸';
+  document.getElementById('lofi-btn').classList.add('playing');
+  document.getElementById('lofi-btn').textContent='🎵';
+  renderLofiTracks();
+}
+function stopLofi(){
+  lofiPlaying=false;
+  const c=document.getElementById('lofi-iframe-container');
+  if(c)c.innerHTML='';
+  document.getElementById('lofi-now').textContent='Not playing';
+  document.getElementById('lofi-play-btn').textContent='▶';
+  document.getElementById('lofi-btn').classList.remove('playing');
+  renderLofiTracks();
+}
+function setLofiVol(v){
+  document.getElementById('lofi-vol-label').textContent=Math.round(v*100)+'%';
+  // Volume control note: YouTube iframes restrict volume control from outside
+  // but we show the slider for visual feedback
+}
+
+// ── WEEKLY SUMMARY ────────────────────────────────────────────────────
+async function openWeeklySummary(){
+  const key=getKey();
+  if(!key){showToast('Add API key first');return;}
+  document.getElementById('summary-overlay').style.display='flex';
+  document.getElementById('summary-body').innerHTML='<div class="summary-loading"><div class="typing"><span></span><span></span><span></span></div>&nbsp; Claude is reviewing your week...</div>';
+
+  const today=new Date();
+  const weekAgo=new Date(today);weekAgo.setDate(weekAgo.getDate()-7);
+  const doneTodos=state.todos.filter(t=>t.done);
+  const openTodos=state.todos.filter(t=>!t.done);
+  const overdue=state.todos.filter(t=>!t.done&&isOverdue(t));
+  const weekEvents=state.events.filter(e=>{const d=new Date(e.date+'T00:00:00');return d>=weekAgo&&d<=today;});
+  const upcomingEvents=state.events.filter(e=>{const d=new Date(e.date+'T00:00:00');return d>today;}).slice(0,5);
+  const pendingFu=state.followups.filter(f=>f.status!=='done');
+
+  const prompt=`You are reviewing someone's personal dashboard for their weekly summary. Be warm, encouraging, and practical. Keep it concise.
+
+Dashboard data:
+- Completed tasks this week: ${doneTodos.length} (${doneTodos.slice(0,5).map(t=>t.text).join(', ')}${doneTodos.length>5?'...':''})
+- Open tasks: ${openTodos.length} (${openTodos.slice(0,8).map(t=>t.text+(t.priority?' ['+t.priority+']':'')).join(', ')})
+- Overdue tasks: ${overdue.length}${overdue.length?': '+overdue.map(t=>t.text).join(', '):''}
+- Events this week: ${weekEvents.length}${weekEvents.length?': '+weekEvents.map(e=>e.title).join(', '):''}
+- Upcoming events: ${upcomingEvents.length}${upcomingEvents.length?': '+upcomingEvents.map(e=>e.title+' ('+fmtDate(e.date)+')').join(', '):''}
+- Pending follow-ups: ${pendingFu.length}${pendingFu.length?': '+pendingFu.map(f=>f.text).join(', '):''}
+- Projects: ${state.projects.length}${state.projects.length?': '+state.projects.map(p=>p.name+' ('+((p.todos||[]).filter(t=>!t.done).length)+' open tasks)').join(', '):''}
+
+Write a weekly summary with these sections:
+1. A short 1-2 sentence overall vibe/tone for the week
+2. Wins — what got done or went well
+3. Watch out — overdue items or things needing attention
+4. Focus for next week — top 3 suggested priorities
+5. One quick tip or encouragement
+
+Format with clear section headers. Keep it friendly and under 300 words.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=data.content[0].text;
+    // Render with simple markdown-like formatting
+    const html=text
+      .replace(/^#{1,3} (.+)$/gm,'<h4>$1</h4>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n\n/g,'</p><p>')
+      .replace(/\n/g,'<br>');
+    document.getElementById('summary-body').innerHTML='<p>'+html+'</p>';
+  }catch(e){
+    document.getElementById('summary-body').innerHTML='<p style="color:var(--red)">Could not generate summary — check your API key.</p>';
+  }
+}
+function closeSummary(){document.getElementById('summary-overlay').style.display='none';}
+
 // ── CLOCK ─────────────────────────────────────────────────────────────
 let clockOpen=false, timerInterval=null, timerRemaining=0, timerRunning=false;
 let alarms=JSON.parse(localStorage.getItem('mydash-alarms')||'[]');
@@ -1036,7 +1327,22 @@ function showAlertPopup(title,msg){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
-loadState();render();scheduleDigest();
+// ── THEME ─────────────────────────────────────────────────────────────
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const newTheme=isDark?'light':'dark';
+  document.documentElement.setAttribute('data-theme',newTheme);
+  localStorage.setItem('mydash-theme',newTheme);
+  document.getElementById('theme-btn').textContent=isDark?'🌙':'☀️';
+}
+function applyTheme(){
+  const saved=localStorage.getItem('mydash-theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
+  const btn=document.getElementById('theme-btn');
+  if(btn)btn.textContent=saved==='dark'?'☀️':'🌙';
+}
+
+loadState();applyTheme();render();scheduleDigest();
 setInterval(updateDigestInfo,60000);
 setInterval(checkAlarms,5000); // check alarms every 5 seconds
 if(Notification.permission==='granted')document.getElementById('notif-btn').textContent='🔔 On';
