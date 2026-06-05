@@ -469,7 +469,22 @@ function togTodo(i,s){
   }
   saveState();render();
 }
-function delTodo(i,s){getScope(s).todos.splice(i,1);saveState();render();}
+function delTodo(i,s){
+  const todo=getScope(s).todos[i];
+  if(!todo)return;
+  // Delete from target scope
+  getScope(s).todos.splice(i,1);
+  // If deleting from a project, also remove the mirror on home
+  if(s!=='home'){
+    state.todos=state.todos.filter(x=>!(x.projectId===s&&x.text===todo.text&&x.due===todo.due));
+  }
+  // If deleting from home and it's a mirrored item, also remove from the project
+  if(s==='home'&&todo.projectId){
+    const proj=state.projects.find(p=>p.id===todo.projectId);
+    if(proj)proj.todos=proj.todos.filter(x=>!(x.text===todo.text&&x.due===todo.due));
+  }
+  saveState();render();
+}
 function cycPri(i,s){const o=['','high','med','low'];const t=getScope(s).todos[i];if(!t)return;t.priority=o[(o.indexOf(t.priority)+1)%o.length];saveState();render();}
 function clearDone(s){const t=getScope(s);t.todos=t.todos.filter(x=>!x.done);saveState();render();}
 function delEvent(i,s){getScope(s).events.splice(i,1);saveState();render();}
