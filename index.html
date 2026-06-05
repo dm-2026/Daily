@@ -7,713 +7,772 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f5f3ef;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --border: #e2ddd6;
-    --text: #1a1816;
-    --text-muted: #7a756e;
-    --text-faint: #b0aba3;
-    --accent: #2d5a3d;
-    --accent-light: #e8f0eb;
-    --accent-text: #1e3d29;
-    --blue: #1a4a7a;
-    --blue-light: #e6eef6;
-    --amber: #8a5a00;
-    --amber-light: #fdf3e0;
-    --red: #8a2222;
-    --red-light: #fceaea;
-    --purple: #5a3a8a;
-    --purple-light: #f0eaf8;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
-  header { padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--surface); gap: 12px; flex-wrap: wrap; }
-  .logo { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
-  .logo span { color: var(--accent); }
-  .header-right { display: flex; align-items: center; gap: 12px; }
-  .date-display { font-size: 13px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
-  .email-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; cursor: default; }
-  .email-status.on { background: var(--accent-light); color: var(--accent-text); }
-  .email-status.off { background: var(--surface2); color: var(--text-faint); }
-  .send-digest-btn { background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); padding: 6px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
-  .send-digest-btn:hover { background: var(--accent-text); }
-  .send-digest-btn:disabled { opacity: 0.5; cursor: default; }
-  .main { display: flex; flex: 1; gap: 0; }
-  .sidebar { width: 300px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
-  .content { flex: 1; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; }
-  .grid-top { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-  .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
-  .panel-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-  .panel-title svg { width: 14px; height: 14px; }
-  .count-badge { background: var(--surface2); border-radius: 20px; padding: 1px 8px; font-size: 11px; font-weight: 500; color: var(--text-muted); }
-  .item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; line-height: 1.45; }
-  .item:last-child { border-bottom: none; }
-  .checkbox { width: 16px; height: 16px; border-radius: 5px; border: 1.5px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
-  .checkbox.checked { background: var(--accent); border-color: var(--accent); }
-  .checkbox.checked::after { content: '✓'; color: white; font-size: 10px; font-weight: 600; }
-  .item-body { flex: 1; }
-  .item-text { color: var(--text); }
-  .item-text.done { text-decoration: line-through; color: var(--text-faint); }
-  .item-meta { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
-  .del { opacity: 0; background: none; border: none; cursor: pointer; color: var(--text-faint); font-size: 16px; padding: 0 2px; line-height: 1; transition: opacity 0.1s; }
-  .item:hover .del { opacity: 1; }
-  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.03em; margin-left: 5px; vertical-align: middle; }
-  .tag.high { background: var(--red-light); color: var(--red); }
-  .tag.med { background: var(--amber-light); color: var(--amber); }
-  .tag.low { background: var(--accent-light); color: var(--accent-text); }
-  .tag.work { background: var(--blue-light); color: var(--blue); }
-  .tag.personal { background: var(--purple-light); color: var(--purple); }
-  .tag.health { background: var(--accent-light); color: var(--accent-text); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-  .dot.purple { background: var(--purple); }
-  .dot.blue { background: var(--blue); }
-  .empty { font-size: 12.5px; color: var(--text-faint); padding: 12px 0; text-align: center; }
-  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .cal-nav-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 9px; cursor: pointer; font-size: 16px; color: var(--text-muted); }
-  .cal-nav-btn:hover { background: var(--surface2); }
-  .cal-month-label { font-size: 14px; font-weight: 600; color: var(--text); }
-  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
-  .cal-dname { font-size: 10px; font-weight: 600; text-align: center; color: var(--text-faint); padding: 3px 0; letter-spacing: 0.05em; }
-  .cal-day { font-size: 12px; text-align: center; padding: 5px 2px; border-radius: 8px; cursor: default; color: var(--text-muted); position: relative; min-height: 30px; display: flex; align-items: center; justify-content: center; }
-  .cal-day.today { background: var(--accent); color: white; font-weight: 600; }
-  .cal-day.has-event::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--blue); }
-  .cal-day.today.has-event::after { background: rgba(255,255,255,0.7); }
-  .cal-day.other { color: var(--text-faint); opacity: 0.4; }
-  .chat-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 10px; }
-  .msg { max-width: 92%; }
-  .msg.user { align-self: flex-end; }
-  .msg.assistant { align-self: flex-start; }
-  .msg-bubble { padding: 9px 13px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
-  .msg.user .msg-bubble { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
-  .msg.assistant .msg-bubble { background: var(--surface2); color: var(--text); border-bottom-left-radius: 4px; }
-  .chat-input-area { padding: 0.875rem 1rem; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
-  .chat-input { flex: 1; resize: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 11px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: var(--surface); color: var(--text); outline: none; line-height: 1.4; max-height: 100px; overflow-y: auto; }
-  .chat-input:focus { border-color: var(--accent); }
-  .send-btn { background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px; transition: background 0.15s; }
-  .send-btn:hover { background: var(--accent-text); }
-  .send-btn:disabled { opacity: 0.5; cursor: default; }
-  .api-setup { padding: 1rem; background: var(--amber-light); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--amber); }
-  .api-setup input { width: 100%; margin-top: 6px; padding: 6px 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 11px; background: var(--surface); color: var(--text); outline: none; }
-  .api-setup button { margin-top: 6px; padding: 5px 12px; background: var(--amber); color: white; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; }
-  .typing { display: flex; gap: 4px; padding: 10px 14px; }
-  .typing span { width: 6px; height: 6px; background: var(--text-faint); border-radius: 50%; animation: bounce 1s infinite; }
-  .typing span:nth-child(2) { animation-delay: 0.15s; }
-  .typing span:nth-child(3) { animation-delay: 0.3s; }
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
-
-  /* Email settings panel */
-  .email-panel { padding: 1rem 1.25rem; border-top: 1px solid var(--border); background: var(--surface2); }
-  .email-panel-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-bottom: 10px; }
-  .email-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text-muted); }
-  .toggle { position: relative; width: 32px; height: 18px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 18px; cursor: pointer; transition: background 0.2s; }
-  .toggle-slider::before { content: ''; position: absolute; width: 13px; height: 13px; left: 2.5px; top: 2.5px; background: white; border-radius: 50%; transition: transform 0.2s; }
-  .toggle input:checked + .toggle-slider { background: var(--accent); }
-  .toggle input:checked + .toggle-slider::before { transform: translateX(14px); }
-  .email-addr { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-faint); }
-  .last-sent { font-size: 11px; color: var(--text-faint); margin-top: 6px; }
-
-  /* Toast */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: white; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; transform: translateY(8px); transition: all 0.2s; pointer-events: none; z-index: 999; }
-  .toast.show { opacity: 1; transform: translateY(0); }
+:root{--bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e2ddd6;--text:#1a1816;--muted:#7a756e;--faint:#b0aba3;--accent:#2d5a3d;--accent-l:#e8f0eb;--accent-t:#1e3d29;--blue:#1a4a7a;--blue-l:#e6eef6;--amber:#8a5a00;--amber-l:#fdf3e0;--red:#8a2222;--red-l:#fceaea;--purple:#5a3a8a;--purple-l:#f0eaf8;--r:12px;--rs:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+/* Header */
+header{padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;gap:10px;flex-wrap:wrap}
+.logo{font-size:16px;font-weight:600;color:var(--text)}.logo span{color:var(--accent)}
+.header-tabs{display:flex;align-items:center;gap:4px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
+.header-tabs::-webkit-scrollbar{display:none}
+.ptab{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;border:.5px solid transparent;color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:5px}
+.ptab:hover{background:var(--surface2)}.ptab.active{background:var(--accent);color:#fff}
+.ptab .cx{opacity:0;font-size:13px}.ptab:hover .cx{opacity:.7}
+.add-proj{width:26px;height:26px;border-radius:50%;border:.5px dashed var(--border);background:transparent;cursor:pointer;color:var(--faint);font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-proj:hover{border-color:var(--accent);color:var(--accent)}
+.hright{display:flex;align-items:center;gap:7px}
+.hbtn{background:transparent;border:.5px solid var(--border);border-radius:var(--rs);padding:5px 11px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s}
+.hbtn:hover{background:var(--surface2)}.hbtn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}.hbtn.pri:hover{background:var(--accent-t)}.hbtn:disabled{opacity:.5;cursor:default}
+.date-d{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+/* Layout */
+.app{display:flex;flex:1;overflow:hidden}
+.sidebar{width:270px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.main{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:.9rem}
+/* Dashboard grid */
+.row{display:grid;gap:.9rem}
+.cols2{grid-template-columns:1fr 1fr}
+.cols3{grid-template-columns:1fr 1fr 1fr}
+.col-span2{grid-column:span 2}
+/* Panels */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;display:flex;flex-direction:column;min-height:0}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.pt{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.badge{background:var(--surface2);border-radius:20px;padding:1px 8px;font-size:11px;color:var(--muted)}
+.panel-body{overflow-y:auto;flex:1}
+/* Items */
+.item{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px;line-height:1.4}
+.item:last-child{border-bottom:none}
+.item.overdue{background:var(--red-l);margin:0 -6px;padding:7px 6px;border-radius:6px;border-bottom:none;margin-bottom:2px}
+.cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--border);cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cb.chk{background:var(--accent);border-color:var(--accent)}.cb.chk::after{content:'✓';color:#fff;font-size:9px;font-weight:700}
+.ib{flex:1;min-width:0}
+.it{color:var(--text);word-break:break-word}.it.done{text-decoration:line-through;color:var(--faint)}
+.it.overdue-text{color:var(--red)}
+.im{font-size:11px;color:var(--faint);margin-top:2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ia{display:flex;gap:2px;opacity:0;transition:opacity .1s;flex-shrink:0}
+.item:hover .ia{opacity:1}
+.iab{background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;padding:2px 3px;border-radius:4px}.iab:hover{background:var(--surface2);color:var(--muted)}
+.tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;margin-left:4px;vertical-align:middle;cursor:pointer}
+.tag.high{background:var(--red-l);color:var(--red)}.tag.med{background:var(--amber-l);color:var(--amber)}.tag.low{background:var(--accent-l);color:var(--accent-t)}
+.tag.work{background:var(--blue-l);color:var(--blue)}.tag.personal{background:var(--purple-l);color:var(--purple)}.tag.health{background:var(--accent-l);color:var(--accent-t)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dot.p{background:var(--purple)}.dot.b{background:var(--blue)}.dot.g{background:var(--accent)}.dot.a{background:var(--amber)}
+.empty{font-size:12px;color:var(--faint);padding:12px 0;text-align:center}
+/* Sort */
+.sbar{display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.sbtn{font-size:10px;padding:2px 9px;border-radius:20px;border:.5px solid var(--border);background:transparent;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif}
+.sbtn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cnb{background:none;border:.5px solid var(--border);border-radius:var(--rs);padding:2px 8px;cursor:pointer;font-size:14px;color:var(--muted)}.cnb:hover{background:var(--surface2)}
+.cml{font-size:13px;font-weight:600}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cdn{font-size:9px;font-weight:700;text-align:center;color:var(--faint);padding:2px 0;letter-spacing:.05em}
+.cd{font-size:11px;text-align:center;padding:4px 2px;border-radius:7px;cursor:pointer;color:var(--muted);position:relative;min-height:26px;display:flex;align-items:center;justify-content:center}
+.cd:hover{background:var(--surface2)}.cd.today{background:var(--accent);color:#fff;font-weight:600}
+.cd.hev::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue)}
+.cd.today.hev::after{background:rgba(255,255,255,.7)}.cd.other{opacity:.35}.cd.sel{outline:2px solid var(--accent);outline-offset:1px}
+/* Day cal */
+.hrow{display:flex;gap:0;min-height:38px;border-bottom:.5px solid var(--border)}
+.hlbl{width:44px;flex-shrink:0;font-size:10px;color:var(--faint);font-family:'DM Mono',monospace;padding:3px 6px 0 0;text-align:right}
+.hslot{flex:1;border-left:.5px solid var(--border);padding:3px 7px;cursor:pointer;transition:background .1s}.hslot:hover{background:var(--accent-l)}
+.hblock{background:var(--accent-l);border-left:3px solid var(--accent);border-radius:0 5px 5px 0;padding:3px 7px;font-size:11px;color:var(--accent-t);margin-bottom:2px;display:flex;align-items:center;justify-content:space-between}
+/* Notes */
+.ntabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.ntab{padding:3px 11px;border-radius:20px;font-size:11px;cursor:pointer;border:.5px solid var(--border);color:var(--muted);background:transparent;display:flex;align-items:center;gap:4px}
+.ntab:hover{background:var(--surface2)}.ntab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ntab .cx{opacity:0;font-size:12px}.ntab:hover .cx{opacity:.7}
+.narea{width:100%;min-height:160px;border:.5px solid var(--border);border-radius:var(--rs);padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;background:var(--surface);color:var(--text);outline:none;resize:vertical}
+.narea:focus{border-color:var(--accent)}
+/* Follow-ups */
+.fus{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0;margin-top:1px}
+.fus.waiting{background:var(--amber-l);color:var(--amber)}.fus.done{background:var(--accent-l);color:var(--accent-t)}.fus.overdue{background:var(--red-l);color:var(--red)}
+/* Links */
+.litem{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.litem:last-child{border-bottom:none}
+/* Chat */
+.chat-hdr{padding:.75rem 1rem;border-bottom:.5px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.msgs{flex:1;overflow-y:auto;padding:.75rem;display:flex;flex-direction:column;gap:7px;min-height:0}
+.msg{max-width:94%}.msg.u{align-self:flex-end}.msg.a{align-self:flex-start}
+.mb{padding:7px 11px;border-radius:13px;font-size:12px;line-height:1.5}
+.msg.u .mb{background:var(--accent);color:#fff;border-bottom-right-radius:3px}
+.msg.a .mb{background:var(--surface2);color:var(--text);border-bottom-left-radius:3px}
+.cia{padding:.65rem .75rem;border-top:.5px solid var(--border);display:flex;gap:6px;align-items:flex-end;flex-shrink:0}
+.ci{flex:1;resize:none;border:.5px solid var(--border);border-radius:var(--rs);padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--surface);color:var(--text);outline:none;line-height:1.4;max-height:75px;overflow-y:auto}
+.ci:focus{border-color:var(--accent)}
+.csb{background:var(--accent);color:#fff;border:none;border-radius:var(--rs);width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.csb:hover{background:var(--accent-t)}.csb:disabled{opacity:.5;cursor:default}
+.typing{display:flex;gap:3px;padding:7px 11px}
+.typing span{width:5px;height:5px;background:var(--faint);border-radius:50%;animation:bn 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bn{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+/* Settings */
+.sp{padding:.75rem;border-top:.5px solid var(--border);background:var(--surface2);flex-shrink:0}
+.sl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:5px}
+.sr{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px}
+.toggle{position:relative;width:28px;height:16px}
+.toggle input{opacity:0;width:0;height:0}
+.ts{position:absolute;inset:0;background:var(--border);border-radius:16px;cursor:pointer;transition:background .2s}
+.ts::before{content:'';position:absolute;width:11px;height:11px;left:2.5px;top:2.5px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle input:checked+.ts{background:var(--accent)}
+.toggle input:checked+.ts::before{transform:translateX(12px)}
+.si{font-size:10px;color:var(--faint);margin-top:2px}
+.ks{font-size:10px;margin-top:3px}.ks.ok{color:var(--accent)}.ks.bad{color:var(--red)}
+.sinput{width:100%;margin-top:4px;padding:5px 7px;border:.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:10px;background:var(--surface);color:var(--text);outline:none}
+.sbtnx{margin-top:4px;padding:4px 10px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--muted)}
+.sbtnx:hover{background:var(--surface)}.sbtnx.ac{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:1.25rem;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:14px;font-weight:600;margin-bottom:.875rem}
+.fr{margin-bottom:10px}
+.fl{font-size:10px;font-weight:700;color:var(--muted);margin-bottom:3px;display:block;text-transform:uppercase;letter-spacing:.04em}
+.fi{width:100%;padding:7px 9px;border:.5px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);outline:none}
+.fi:focus{border-color:var(--accent)}
+.fsel{width:100%;padding:7px 9px;border:.5px solid var(--border);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);outline:none;cursor:pointer}
+.ma{display:flex;gap:7px;justify-content:flex-end;margin-top:.875rem}
+.btn{padding:6px 14px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;border:.5px solid var(--border);background:transparent;color:var(--muted)}
+.btn:hover{background:var(--surface2)}.btn.p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn.p:hover{background:var(--accent-t)}
+/* Toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--text);color:#fff;padding:8px 14px;border-radius:var(--rs);font-size:12px;opacity:0;transform:translateY(5px);transition:all .2s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+/* Project page */
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.tl{display:flex;flex-direction:column}
+.tli{display:flex;gap:10px;padding-bottom:14px;position:relative}
+.tli::before{content:'';position:absolute;left:6px;top:14px;bottom:0;width:1px;background:var(--border)}
+.tli:last-child::before{display:none}
+.tld{width:13px;height:13px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:2px;border:2px solid #fff;box-shadow:0 0 0 1px var(--accent);cursor:pointer}
+.tld.done{background:var(--faint);box-shadow:0 0 0 1px var(--faint)}
 </style>
 </head>
 <body>
-
 <header>
   <div class="logo">my<span>dashboard</span></div>
-  <div class="header-right">
-    <div class="date-display" id="date-display"></div>
-    <div class="email-status off" id="email-status-badge" title="Daily digest status">● Daily digest off</div>
-    <button class="send-digest-btn" id="send-digest-btn" onclick="sendDigestNow()">
-      ✉ Send digest now
-    </button>
+  <div class="header-tabs">
+    <div class="ptab active" onclick="switchPage('home')">🏠 Home</div>
+    <div id="proj-tabs"></div>
+    <button class="add-proj" onclick="addProject()" title="New project">+</button>
+  </div>
+  <div class="hright">
+    <div class="date-d" id="date-d"></div>
+    <button class="hbtn" onclick="requestNotifications()" id="notif-btn">🔔 Notify</button>
+    <button class="hbtn pri" id="digest-btn" onclick="sendDigestNow()">✉ Digest</button>
+    <button class="hbtn" onclick="openEmailJSSetup()" title="Email setup">⚙ Email setup</button>
   </div>
 </header>
 
-<div class="main">
+<div class="app">
   <!-- Sidebar -->
   <div class="sidebar">
-    <div class="chat-header">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px"><path d="M8 1.5C4.4 1.5 1.5 4 1.5 7c0 1.5.7 2.9 1.8 3.9L2.5 14l3.4-1.2C6.5 13.2 7.2 13.4 8 13.4c3.6 0 6.5-2.5 6.5-5.5S11.6 1.5 8 1.5z"/></svg>
-      Chat to update
+    <div class="chat-hdr">💬 Chat to update</div>
+    <div class="msgs" id="msgs">
+      <div class="msg a"><div class="mb">👋 Hi Aidan! Tell me what to add:<br><br>• "Add to-do: send proposal Friday high priority"<br>• "Remind me: call client Monday 9am, notify me"<br>• "Add event: team lunch June 12 1pm"<br>• "Add follow-up: waiting on John re contract"<br>• "Send my digest"</div></div>
     </div>
-
-    <div id="api-setup-area" class="api-setup">
-      <strong>Add your Anthropic API key</strong> to enable AI updates &amp; email digest.<br>
-      Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a>
-      <input type="password" id="api-key-input" placeholder="sk-ant-..." />
-      <button onclick="saveApiKey()">Save key</button>
+    <div class="cia">
+      <textarea class="ci" id="ci" placeholder="Tell me what to update..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,75)+'px'"></textarea>
+      <button class="csb" id="csb" onclick="sendMsg()">↑</button>
     </div>
-
-    <div class="chat-messages" id="chat-messages">
-      <div class="msg assistant">
-        <div class="msg-bubble">
-          👋 Hi! Tell me what to add:<br><br>
-          • "Add a to-do: call John, high priority"<br>
-          • "Remind me: take medication daily at 8am"<br>
-          • "Add event: team lunch June 12 at 1pm"<br>
-          • "Send my daily digest now"<br>
-          • "Mark the report task done"
-        </div>
+    <div class="sp">
+      <div class="sl">API Key</div>
+      <div class="ks bad" id="ks">No key saved</div>
+      <div id="ki-area">
+        <input type="password" class="sinput" id="api-in" placeholder="sk-ant-..."/>
+        <button class="sbtnx ac" onclick="saveKey()">Save key</button>
       </div>
-    </div>
-
-    <div class="chat-input-area">
-      <textarea class="chat-input" id="chat-input" placeholder="Tell me what to update..." rows="1"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-      <button class="send-btn" id="send-btn" onclick="sendMessage()" title="Send">&#8593;</button>
-    </div>
-
-    <!-- Email settings -->
-    <div class="email-panel">
-      <div class="email-panel-title">📧 Daily Email Digest</div>
-      <div class="email-row">
-        <span>Enable 8am digest</span>
-        <label class="toggle">
-          <input type="checkbox" id="digest-toggle" onchange="toggleDigest()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="email-addr" id="email-addr-display">→ aidan@sustaindesign.net</div>
-      <div class="last-sent" id="last-sent-display"></div>
-      <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
-        <div id="api-key-status" style="font-size:11px;color:var(--text-faint);margin-bottom:6px"></div>
-        <button onclick="showApiKeyReset()" style="font-size:11px;background:transparent;border:0.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif">🔑 Update API key</button>
-        <div id="api-key-reset" style="display:none;margin-top:8px">
-          <input type="password" id="api-key-reset-input" placeholder="sk-ant-..." style="width:100%;padding:6px 9px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:11px;background:var(--surface);color:var(--text);outline:none;margin-bottom:6px"/>
-          <button onclick="saveApiKeyReset()" style="padding:4px 12px;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">Save</button>
-          <button onclick="document.getElementById('api-key-reset').style.display='none'" style="padding:4px 10px;background:transparent;border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;color:var(--text-muted);margin-left:4px">Cancel</button>
-        </div>
+      <button class="sbtnx" id="upd-key-btn" style="display:none" onclick="showKeyInput()">🔑 Update key</button>
+      <div style="margin-top:10px;border-top:.5px solid var(--border);padding-top:8px">
+        <div class="sl">Daily Email · aidan@sustaindesign.net</div>
+        <div class="sr"><span>8am digest</span><label class="toggle"><input type="checkbox" id="dtoggle" onchange="toggleDigest()"><span class="ts"></span></label></div>
+        <div class="si" id="di"></div>
+        <div class="si" id="ls"></div>
       </div>
     </div>
   </div>
 
-  <!-- Main content -->
-  <div class="content">
-    <div class="grid-top">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M5 7l2 2 4-3"/></svg>
-            To-do
-          </div>
-          <span class="count-badge" id="todo-count">0</span>
-        </div>
-        <div id="todo-list"><div class="empty">No tasks yet</div></div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5.5V8.5l2 1.5"/></svg>
-            Reminders
-          </div>
-          <span class="count-badge" id="reminder-count">0</span>
-        </div>
-        <div id="reminder-list"><div class="empty">No reminders yet</div></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="2"/><path d="M1.5 6h13M5 1.5v2M11 1.5v2"/></svg>
-          Calendar
-        </div>
-        <span class="count-badge" id="event-count">0 events</span>
-      </div>
-      <div style="display:grid;grid-template-columns:220px 1fr;gap:1.5rem;align-items:start">
-        <div>
-          <div class="cal-nav">
-            <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
-            <span class="cal-month-label" id="cal-label"></span>
-            <button class="cal-nav-btn" onclick="nextMonth()">›</button>
-          </div>
-          <div class="cal-grid" id="cal-grid"></div>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">Upcoming</div>
-          <div id="event-list"><div class="empty">No events yet</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Main -->
+  <div class="main" id="main-area"></div>
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="ov" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="mc"></div>
+</div>
 
 <script>
-// ── Constants ──────────────────────────────────────────────────────────
-const STORE = 'mydash-v2';
-const DIGEST_EMAIL = 'aidan@sustaindesign.net';
-let state = { todos: [], reminders: [], events: [] };
-let calYear, calMonth;
-let digestTimer = null;
+// ── State ──────────────────────────────────────────────────────────────
+const STORE='mydash-v4', EMAIL='aidan@sustaindesign.net';
+let state={todos:[],reminders:[],events:[],notes:{'General':''},followups:[],links:[],timeBlocks:{},projects:[]};
+let calY,calM,calSel=null,curPage='home',noteTab=0,todoSort='priority',digestTimer=null;
 
-// ── Persistence ────────────────────────────────────────────────────────
-function loadState() {
-  try { const s = localStorage.getItem(STORE); if (s) state = JSON.parse(s); } catch(e) {}
-  const now = new Date();
-  calYear = now.getFullYear(); calMonth = now.getMonth();
+function loadState(){
+  try{const s=localStorage.getItem(STORE);if(s){const p=JSON.parse(s);state={...state,...p};}}catch(e){}
+  const n=new Date();calY=n.getFullYear();calM=n.getMonth();
+  if(!state.notes||typeof state.notes!=='object')state.notes={'General':''};
+  if(!state.notes['General'])state.notes['General']='';
+  ['followups','links','projects'].forEach(k=>{if(!state[k])state[k]=[];});
+  if(!state.timeBlocks)state.timeBlocks={};
 }
-function saveState() {
-  try { localStorage.setItem(STORE, JSON.stringify(state)); } catch(e) {}
-}
+function saveState(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
 
-// ── API Key ────────────────────────────────────────────────────────────
-function saveApiKey() {
-  const k = document.getElementById('api-key-input').value.trim();
-  if (!k) return;
-  localStorage.setItem('mydash-apikey', k);
-  document.getElementById('api-setup-area').style.display = 'none';
-  addMsg('assistant', '✅ API key saved! I\'m ready. You can also toggle the 8am daily digest in the bottom-left panel.');
-}
-function getApiKey() { return localStorage.getItem('mydash-apikey') || ''; }
-function showApiKeyReset() { document.getElementById('api-key-reset').style.display='block'; document.getElementById('api-key-reset-input').focus(); }
-function saveApiKeyReset() {
-  const k = document.getElementById('api-key-reset-input').value.trim();
-  if (!k) return;
-  localStorage.setItem('mydash-apikey', k);
-  document.getElementById('api-key-reset').style.display='none';
-  document.getElementById('api-key-reset-input').value='';
-  document.getElementById('api-setup-area').style.display='none';
-  updateApiKeyStatus();
-  showToast('API key updated!');
-  addMsg('assistant','API key updated! Try your request again.');
-}
-function updateApiKeyStatus() {
-  const k = getApiKey();
-  const el = document.getElementById('api-key-status');
-  if (k) { el.textContent = 'Key saved: ' + k.substring(0,12) + '...'; el.style.color='var(--accent)'; }
-  else { el.textContent = 'No API key saved'; el.style.color='var(--red)'; }
-}
-
-// ── Toast ──────────────────────────────────────────────────────────────
-function showToast(msg, duration = 3000) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
+// ── Date helpers ────────────────────────────────────────────────────────
+function fmtDate(s){if(!s)return'';try{return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){return s;}}
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function isOverdue(t){if(!t.due||t.done)return false;return new Date(t.due+'T00:00:00')<new Date(new Date().toDateString());}
 
 // ── Render ─────────────────────────────────────────────────────────────
-function render() {
-  renderTodos(); renderReminders(); renderCalendar(); renderEvents();
-  document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  updateDigestStatus();
+function render(){
+  document.getElementById('date-d').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  renderProjTabs();
+  if(curPage==='home') renderHome();
+  else renderProject(curPage);
+  updateKeyStatus();updateDigestInfo();
 }
 
-function renderTodos() {
-  const el = document.getElementById('todo-list');
-  const active = state.todos.filter(t => !t.done).length;
-  document.getElementById('todo-count').textContent = active || state.todos.length;
-  if (!state.todos.length) { el.innerHTML = '<div class="empty">No tasks yet</div>'; return; }
-  el.innerHTML = state.todos.map((t, i) => `
-    <div class="item">
-      <div class="checkbox ${t.done ? 'checked' : ''}" onclick="toggleTodo(${i})"></div>
-      <div class="item-body">
-        <div class="item-text ${t.done ? 'done' : ''}">${t.text}${t.priority ? `<span class="tag ${t.priority}">${t.priority}</span>` : ''}${t.category ? `<span class="tag ${t.category}">${t.category}</span>` : ''}</div>
-        ${t.due ? `<div class="item-meta">📅 ${t.due}</div>` : ''}
-      </div>
-      <button class="del" onclick="delTodo(${i})" title="Delete">×</button>
-    </div>`).join('');
+function renderProjTabs(){
+  document.getElementById('proj-tabs').innerHTML=state.projects.map(p=>
+    `<div class="ptab ${curPage===p.id?'active':''}" onclick="switchPage('${p.id}')">📁 ${p.name}<span class="cx" onclick="event.stopPropagation();delProject('${p.id}')">×</span></div>`
+  ).join('');
+  // Fix home tab active state
+  document.querySelector('.ptab').className='ptab'+(curPage==='home'?' active':'');
 }
 
-function renderReminders() {
-  const el = document.getElementById('reminder-list');
-  document.getElementById('reminder-count').textContent = state.reminders.length;
-  if (!state.reminders.length) { el.innerHTML = '<div class="empty">No reminders yet</div>'; return; }
-  el.innerHTML = state.reminders.map((r, i) => `
-    <div class="item">
-      <div class="dot purple"></div>
-      <div class="item-body">
-        <div class="item-text">${r.text}</div>
-        ${r.when ? `<div class="item-meta">⏰ ${r.when}</div>` : ''}
-      </div>
-      <button class="del" onclick="delReminder(${i})" title="Delete">×</button>
-    </div>`).join('');
-}
-
-function renderCalendar() {
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-label').textContent = `${months[calMonth]} ${calYear}`;
-  const today = new Date();
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const evDays = new Set(state.events.filter(e => {
-    const d = new Date(e.date + 'T00:00:00');
-    return d.getFullYear() === calYear && d.getMonth() === calMonth;
-  }).map(e => new Date(e.date + 'T00:00:00').getDate()));
-  let html = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div class="cal-dname">${d}</div>`).join('');
-  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day other"></div>`;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = today.getFullYear() === calYear && today.getMonth() === calMonth && today.getDate() === d;
-    const hasEv = evDays.has(d);
-    html += `<div class="cal-day${isToday ? ' today' : ''}${hasEv ? ' has-event' : ''}">${d}</div>`;
-  }
-  document.getElementById('cal-grid').innerHTML = html;
-}
-
-function renderEvents() {
-  const el = document.getElementById('event-list');
-  document.getElementById('event-count').textContent = `${state.events.length} event${state.events.length !== 1 ? 's' : ''}`;
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const upcoming = [...state.events].sort((a, b) => new Date(a.date) - new Date(b.date));
-  if (!upcoming.length) { el.innerHTML = '<div class="empty">No events yet</div>'; return; }
-  el.innerHTML = upcoming.map(e => {
-    const i = state.events.indexOf(e);
-    const d = new Date(e.date + 'T00:00:00');
-    const diff = Math.round((d - today) / 86400000);
-    const when = diff < 0 ? `${Math.abs(diff)}d ago` : diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-    return `<div class="item">
-      <div class="dot blue"></div>
-      <div class="item-body">
-        <div class="item-text">${e.title}${e.category ? `<span class="tag ${e.category}">${e.category}</span>` : ''}</div>
-        <div class="item-meta">${when}${e.time ? ' · ' + e.time : ''}${e.location ? ' · 📍' + e.location : ''}</div>
-      </div>
-      <button class="del" onclick="delEvent(${i})" title="Delete">×</button>
+function renderHome(){
+  const area=document.getElementById('main-area');
+  area.innerHTML=`
+    <!-- Row 1: Todos + Reminders -->
+    <div class="row cols2">
+      <div class="panel">${renderTodosPanel()}</div>
+      <div class="panel">${renderRemindersPanel()}</div>
+    </div>
+    <!-- Row 2: Calendar + Day view -->
+    <div class="row cols2">
+      <div class="panel">${renderCalPanel()}</div>
+      <div class="panel">${renderDayPanel()}</div>
+    </div>
+    <!-- Row 3: Follow-ups + Links -->
+    <div class="row cols2">
+      <div class="panel">${renderFollowupsPanel()}</div>
+      <div class="panel">${renderLinksPanel()}</div>
+    </div>
+    <!-- Row 4: Notes (full width) -->
+    <div class="row">
+      <div class="panel">${renderNotesPanel()}</div>
     </div>`;
-  }).join('');
 }
 
-// ── CRUD ───────────────────────────────────────────────────────────────
-function toggleTodo(i) { state.todos[i].done = !state.todos[i].done; saveState(); renderTodos(); }
-function delTodo(i) { state.todos.splice(i, 1); saveState(); renderTodos(); }
-function delReminder(i) { state.reminders.splice(i, 1); saveState(); renderReminders(); }
-function delEvent(i) { state.events.splice(i, 1); saveState(); renderCalendar(); renderEvents(); }
-function prevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
-function nextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
-
-// ── Email digest ───────────────────────────────────────────────────────
-function buildEmailHTML() {
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const todayStr = today.toISOString().split('T')[0];
-
-  const activeTodos = state.todos.filter(t => !t.done);
-  const doneTodos = state.todos.filter(t => t.done);
-
-  const todayEvents = state.events.filter(e => e.date === todayStr);
-  const tomorrowDate = new Date(today); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-  const tomorrowStr = tomorrowDate.toISOString().split('T')[0];
-  const tomorrowEvents = state.events.filter(e => e.date === tomorrowStr);
-  const upcomingEvents = state.events.filter(e => {
-    const d = new Date(e.date + 'T00:00:00');
-    const diff = Math.round((d - today) / 86400000);
-    return diff > 1 && diff <= 7;
-  }).sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  const priorityOrder = { high: 0, med: 1, low: 2, '': 3 };
-  activeTodos.sort((a, b) => (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3));
-
-  const priorityColor = { high: '#8a2222', med: '#8a5a00', low: '#2d5a3d', '': '#7a756e' };
-  const priorityBg = { high: '#fceaea', med: '#fdf3e0', low: '#e8f0eb', '': '#f0ede8' };
-
-  let todoRows = activeTodos.length > 0
-    ? activeTodos.map(t => `
-      <tr>
-        <td style="padding:8px 0;border-bottom:1px solid #e2ddd6;font-size:14px;color:#1a1816;">
-          ☐ ${t.text}
-          ${t.priority ? `<span style="display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:${priorityBg[t.priority]};color:${priorityColor[t.priority]};margin-left:6px">${t.priority}</span>` : ''}
-          ${t.category ? `<span style="display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:#e6eef6;color:#1a4a7a;margin-left:4px">${t.category}</span>` : ''}
-        </td>
-        <td style="padding:8px 0;border-bottom:1px solid #e2ddd6;font-size:12px;color:#b0aba3;text-align:right;white-space:nowrap">${t.due || ''}</td>
-      </tr>`).join('')
-    : `<tr><td colspan="2" style="padding:12px 0;font-size:13px;color:#b0aba3;text-align:center">No open tasks 🎉</td></tr>`;
-
-  let reminderRows = state.reminders.length > 0
-    ? state.reminders.map(r => `
-      <tr>
-        <td style="padding:8px 0;border-bottom:1px solid #e2ddd6;font-size:14px;color:#1a1816;">🔔 ${r.text}</td>
-        <td style="padding:8px 0;border-bottom:1px solid #e2ddd6;font-size:12px;color:#b0aba3;text-align:right">${r.when || ''}</td>
-      </tr>`).join('')
-    : `<tr><td colspan="2" style="padding:12px 0;font-size:13px;color:#b0aba3;text-align:center">No reminders</td></tr>`;
-
-  const eventBlock = (events, label) => events.length === 0 ? '' : `
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#7a756e;margin-bottom:6px">${label}</div>
-      ${events.map(e => `<div style="padding:7px 0;border-bottom:1px solid #e2ddd6;font-size:14px;color:#1a1816">
-        📅 ${e.title}${e.time ? ` <span style="color:#7a756e;font-size:12px">· ${e.time}</span>` : ''}${e.location ? ` <span style="color:#b0aba3;font-size:12px">📍${e.location}</span>` : ''}
-      </div>`).join('')}
+// ── TODOS ──────────────────────────────────────────────────────────────
+function sortedTodos(todos){
+  const p={high:0,med:1,low:2,'':3};
+  return [...todos].sort((a,b)=>{
+    if(todoSort==='priority')return(p[a.priority]||3)-(p[b.priority]||3);
+    if(todoSort==='due'){if(!a.due&&!b.due)return 0;if(!a.due)return 1;if(!b.due)return-1;return new Date(a.due)-new Date(b.due);}
+    return 0;
+  });
+}
+function todoItem(t,i,scope){
+  const over=isOverdue(t);
+  return `<div class="item${over?' overdue':''}">
+    <div class="cb ${t.done?'chk':''}" onclick="togTodo(${i},'${scope}')"></div>
+    <div class="ib">
+      <div class="it ${t.done?'done':''}${over?' overdue-text':''}">${t.text}${t.priority?`<span class="tag ${t.priority}" onclick="cycPri(${i},'${scope}')" title="Change priority">${t.priority}</span>`:''}${t.category?`<span class="tag ${t.category}">${t.category}</span>`:''}</div>
+      ${t.due?`<div class="im">📅 ${fmtDate(t.due)}${over?` · <span style="color:var(--red);font-weight:600">Overdue</span>`:''}</div>`:''}
+    </div>
+    <div class="ia">
+      <button class="iab" onclick="editTodo(${i},'${scope}')" title="Edit">✏</button>
+      <button class="iab" onclick="cycPri(${i},'${scope}')" title="Priority">🎯</button>
+      <button class="iab" onclick="delTodo(${i},'${scope}')">×</button>
+    </div>
+  </div>`;
+}
+function renderTodosPanel(){
+  const src=state.todos;
+  const active=src.filter(t=>!t.done);
+  const done=src.filter(t=>t.done);
+  const sorted=sortedTodos(active);
+  return `<div class="ph"><div class="pt">✅ To-do <span class="badge">${active.length}</span></div><button class="hbtn" onclick="openAddTodo('home')">+ Add</button></div>
+    <div class="sbar">
+      <button class="sbtn ${todoSort==='priority'?'on':''}" onclick="setSort('priority')">Priority</button>
+      <button class="sbtn ${todoSort==='due'?'on':''}" onclick="setSort('due')">Due date</button>
+      <button class="sbtn ${todoSort==='added'?'on':''}" onclick="setSort('added')">Added</button>
+      ${done.length?`<button class="sbtn" onclick="clearDone('home')" style="margin-left:auto">Clear ${done.length} done</button>`:''}
+    </div>
+    <div class="panel-body">
+      ${sorted.length?sorted.map(t=>todoItem(t,src.indexOf(t),'home')).join(''):'<div class="empty">No tasks yet</div>'}
+      ${done.length?`<details style="margin-top:8px"><summary style="font-size:11px;color:var(--faint);cursor:pointer">${done.length} completed</summary><div style="margin-top:6px;opacity:.7">${done.map(t=>todoItem(t,src.indexOf(t),'home')).join('')}</div></details>`:''}
     </div>`;
-
-  const noEvents = todayEvents.length === 0 && tomorrowEvents.length === 0 && upcomingEvents.length === 0;
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f5f3ef;font-family:'Helvetica Neue',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;padding:32px 16px">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;border:1px solid #e2ddd6;overflow:hidden">
-
-  <tr><td style="background:#2d5a3d;padding:24px 32px">
-    <div style="font-size:20px;font-weight:600;color:#ffffff;letter-spacing:-0.3px">my<span style="opacity:0.75">dashboard</span></div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px">${dateStr}</div>
-  </td></tr>
-
-  <tr><td style="padding:28px 32px 0">
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#7a756e;margin-bottom:12px">✅ To-do (${activeTodos.length} open${doneTodos.length > 0 ? ', ' + doneTodos.length + ' done' : ''})</div>
-    <table width="100%" cellpadding="0" cellspacing="0">${todoRows}</table>
-  </td></tr>
-
-  <tr><td style="padding:24px 32px 0">
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#7a756e;margin-bottom:12px">🔔 Reminders (${state.reminders.length})</div>
-    <table width="100%" cellpadding="0" cellspacing="0">${reminderRows}</table>
-  </td></tr>
-
-  <tr><td style="padding:24px 32px">
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#7a756e;margin-bottom:12px">📅 Calendar</div>
-    ${noEvents ? `<div style="font-size:13px;color:#b0aba3;text-align:center;padding:12px 0">No events in the next 7 days</div>` : ''}
-    ${eventBlock(todayEvents, 'Today')}
-    ${eventBlock(tomorrowEvents, 'Tomorrow')}
-    ${eventBlock(upcomingEvents, 'This week')}
-  </td></tr>
-
-  <tr><td style="background:#f0ede8;padding:16px 32px;border-top:1px solid #e2ddd6">
-    <div style="font-size:11px;color:#b0aba3;text-align:center">Sent by your personal dashboard · Have a great day! 🌱</div>
-  </td></tr>
-
-</table>
-</td></tr>
-</table>
-</body></html>`;
 }
 
-async function sendDigestEmail(triggeredBy) {
-  const apiKey = getApiKey();
-  if (!apiKey) { showToast('⚠️ Add your API key first'); return false; }
+// ── REMINDERS ──────────────────────────────────────────────────────────
+function renderRemindersPanel(){
+  return `<div class="ph"><div class="pt">🔔 Reminders <span class="badge">${state.reminders.length}</span></div><button class="hbtn" onclick="openAddReminder()">+ Add</button></div>
+    <div class="panel-body">
+      ${state.reminders.length?state.reminders.map((r,i)=>`<div class="item">
+        <div class="dot p"></div>
+        <div class="ib"><div class="it">${r.text}${r.notify?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:5px;vertical-align:middle" title="Notification set"></span>':''}</div>
+        ${r.when?`<div class="im">⏰ ${r.when}</div>`:''}</div>
+        <div class="ia"><button class="iab" onclick="delReminder(${i})">×</button></div>
+      </div>`).join(''):'<div class="empty">No reminders yet</div>'}
+    </div>`;
+}
 
-  const btn = document.getElementById('send-digest-btn');
-  btn.disabled = true; btn.textContent = '⏳ Sending...';
-
-  try {
-    const emailHTML = buildEmailHTML();
-    const today = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
-    const subject = `Your daily dashboard · ${today}`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1000,
-        system: `You are an email sending assistant. The user wants to send an HTML email digest. Use the Gmail MCP tool to send the email. Send it exactly as instructed.`,
-        messages: [{
-          role: 'user',
-          content: `Please send an email using Gmail with:
-To: ${DIGEST_EMAIL}
-Subject: ${subject}
-Body (HTML): ${emailHTML}
-
-Send it now using the Gmail send tool.`
-        }],
-        mcp_servers: [{ type: 'url', url: 'https://gmailmcp.googleapis.com/mcp/v1', name: 'gmail' }]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-
-    const now = new Date();
-    localStorage.setItem('mydash-last-digest', now.toISOString());
-    updateDigestStatus();
-    showToast(`✉ Digest sent to ${DIGEST_EMAIL}`);
-    if (triggeredBy === 'chat') addMsg('assistant', `✅ Daily digest sent to ${DIGEST_EMAIL}!`);
-    btn.disabled = false; btn.innerHTML = '✉ Send digest now';
-    return true;
-  } catch(err) {
-    showToast('⚠️ Failed to send email — check your API key & Gmail connection');
-    btn.disabled = false; btn.innerHTML = '✉ Send digest now';
-    return false;
+// ── CALENDAR ──────────────────────────────────────────────────────────
+function renderCalPanel(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const firstDay=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const today=new Date();
+  const evDays=new Set(state.events.filter(e=>{const d=new Date(e.date+'T00:00:00');return d.getFullYear()===calY&&d.getMonth()===calM;}).map(e=>new Date(e.date+'T00:00:00').getDate()));
+  let cg=['Su','Mo','Tu','We','Th','Fr','Sa'].map(d=>`<div class="cdn">${d}</div>`).join('');
+  for(let i=0;i<firstDay;i++)cg+=`<div class="cd other"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isTod=today.getFullYear()===calY&&today.getMonth()===calM&&today.getDate()===d;
+    cg+=`<div class="cd${isTod?' today':''}${evDays.has(d)?' hev':''}${calSel===ds?' sel':''}" onclick="selDay('${ds}')">${d}</div>`;
   }
+  const tNow=new Date();tNow.setHours(0,0,0,0);
+  const upcoming=[...state.events].filter(e=>new Date(e.date+'T00:00:00')>=tNow).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,5);
+  const selEvs=calSel?state.events.filter(e=>e.date===calSel):[];
+  return `<div class="ph"><div class="pt">📅 Calendar <span class="badge">${state.events.length}</span></div><button class="hbtn" onclick="openAddEvent('home')">+ Event</button></div>
+    <div class="cal-nav"><button class="cnb" onclick="prevM()">‹</button><span class="cml">${months[calM]} ${calY}</span><button class="cnb" onclick="nextM()">›</button></div>
+    <div class="cgrid">${cg}</div>
+    ${calSel?`<div style="margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)"><div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">${fmtDate(calSel)}</div>${selEvs.length?selEvs.map((e,i)=>`<div class="item"><div class="dot b"></div><div class="ib"><div class="it">${e.title}</div><div class="im">${e.time||''}${e.location?' · 📍'+e.location:''}</div></div><div class="ia"><button class="iab" onclick="delEvent(${state.events.indexOf(e)},'home')">×</button></div></div>`).join(''):'<div class="empty" style="padding:6px 0">No events</div>'}</div>`:''}
+    ${upcoming.length?`<div style="margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:6px">Upcoming</div>${upcoming.map(e=>{const d=new Date(e.date+'T00:00:00');const diff=Math.round((d-tNow)/86400000);const when=diff===0?'Today':diff===1?'Tomorrow':d.toLocaleDateString('en-US',{month:'short',day:'numeric'});return`<div class="item"><div class="dot b"></div><div class="ib"><div class="it">${e.title}</div><div class="im">${when}${e.time?' · '+e.time:''}</div></div><div class="ia"><button class="iab" onclick="delEvent(${state.events.indexOf(e)},'home')">×</button></div></div>`;}).join('')}</div>`:''}`;
 }
 
-function sendDigestNow() { sendDigestEmail('button'); }
-
-// ── 8am scheduler ──────────────────────────────────────────────────────
-function msUntil8am() {
-  const now = new Date();
-  const next = new Date(now);
-  next.setHours(8, 0, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1);
-  return next - now;
-}
-
-function scheduleDigest() {
-  if (digestTimer) { clearTimeout(digestTimer); digestTimer = null; }
-  if (!localStorage.getItem('mydash-digest-on')) return;
-
-  const ms = msUntil8am();
-  const hrs = Math.round(ms / 3600000 * 10) / 10;
-  console.log(`[Dashboard] Daily digest scheduled in ${hrs}h`);
-
-  digestTimer = setTimeout(async () => {
-    const lastSent = localStorage.getItem('mydash-last-digest');
-    const todayDate = new Date().toISOString().split('T')[0];
-    if (lastSent && lastSent.startsWith(todayDate)) {
-      scheduleDigest(); return;
-    }
-    await sendDigestEmail('scheduler');
-    scheduleDigest();
-  }, ms);
-}
-
-function toggleDigest() {
-  const on = document.getElementById('digest-toggle').checked;
-  if (on) { localStorage.setItem('mydash-digest-on', '1'); scheduleDigest(); showToast('8am digest enabled ✓'); }
-  else { localStorage.removeItem('mydash-digest-on'); if (digestTimer) { clearTimeout(digestTimer); digestTimer = null; } showToast('Digest disabled'); }
-  updateDigestStatus();
-}
-
-function updateDigestStatus() {
-  const on = !!localStorage.getItem('mydash-digest-on');
-  document.getElementById('digest-toggle').checked = on;
-  const badge = document.getElementById('email-status-badge');
-  badge.textContent = on ? '● Daily digest on' : '● Daily digest off';
-  badge.className = 'email-status ' + (on ? 'on' : 'off');
-  const last = localStorage.getItem('mydash-last-digest');
-  if (last) {
-    const d = new Date(last);
-    document.getElementById('last-sent-display').textContent = `Last sent: ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})} at ${d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
+// ── DAY VIEW ──────────────────────────────────────────────────────────
+function renderDayPanel(){
+  const ds=calSel||todayStr();
+  const blocks=state.timeBlocks[ds]||[];
+  const dayEvs=state.events.filter(e=>e.date===ds);
+  let rows='';
+  for(let h=7;h<=19;h++){
+    const lbl=h===12?'12pm':h>12?`${h-12}pm`:`${h}am`;
+    const hb=blocks.filter(b=>b.hour===h);
+    const he=dayEvs.filter(e=>e.time&&parseInt(e.time.split(':')[0])===h);
+    rows+=`<div class="hrow"><div class="hlbl">${lbl}</div><div class="hslot" onclick="openAddBlock('${ds}',${h})">
+      ${hb.map((b,i)=>`<div class="hblock">${b.title}${b.duration>1?` <span style="font-size:9px;color:var(--faint)">(${b.duration}h)</span>`:''}<button style="background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;margin-left:4px" onclick="event.stopPropagation();delBlock('${ds}',${blocks.indexOf(b)})">×</button></div>`).join('')}
+      ${he.map(e=>`<div style="background:var(--blue-l);border-left:3px solid var(--blue);border-radius:0 5px 5px 0;padding:3px 7px;font-size:11px;color:var(--blue);margin-bottom:2px">📅 ${e.title}</div>`).join('')}
+    </div></div>`;
   }
-  const ms = msUntil8am();
-  const hrs = Math.floor(ms / 3600000);
-  const mins = Math.floor((ms % 3600000) / 60000);
-  document.getElementById('email-addr-display').textContent = on
-    ? `→ ${DIGEST_EMAIL} · next in ${hrs}h ${mins}m`
-    : `→ ${DIGEST_EMAIL}`;
+  return `<div class="ph"><div class="pt">🕐 Day View · ${fmtDate(ds)}</div><button class="hbtn" onclick="openAddBlock('${ds}',9)">+ Block</button></div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button class="hbtn" onclick="prevDay('${ds}')">‹</button>
+      <button class="hbtn" onclick="nextDay('${ds}')">›</button>
+      <span style="font-size:11px;color:var(--faint);align-self:center">Click slot to add block</span>
+    </div>
+    <div class="panel-body" style="max-height:280px">${rows}</div>`;
 }
 
-// ── AI Chat ────────────────────────────────────────────────────────────
-function addMsg(role, text) {
-  const el = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
-  el.appendChild(div); el.scrollTop = el.scrollHeight;
-  return div;
+// ── FOLLOW-UPS ────────────────────────────────────────────────────────
+function renderFollowupsPanel(){
+  return `<div class="ph"><div class="pt">↩️ Follow-ups <span class="badge">${state.followups.filter(f=>f.status!=='done').length}</span></div><button class="hbtn" onclick="openAddFollowup()">+ Add</button></div>
+    <div class="panel-body">
+      ${state.followups.length?state.followups.map((f,i)=>{
+        const over=f.dueDate&&new Date(f.dueDate+'T00:00:00')<new Date()&&f.status!=='done';
+        const st=over?'overdue':f.status||'waiting';
+        return`<div class="item"><span class="fus ${st}">${st}</span>
+          <div class="ib"><div class="it">${f.text}</div><div class="im">${f.person?'👤 '+f.person+' · ':''}${f.dueDate?'📅 '+fmtDate(f.dueDate):''}</div></div>
+          <div class="ia">${f.status!=='done'?`<button class="iab" onclick="markFuDone(${i})" title="Done">✓</button>`:''}<button class="iab" onclick="delFu(${i})">×</button></div>
+        </div>`;
+      }).join(''):'<div class="empty">No follow-ups yet</div>'}
+    </div>`;
 }
-function showTyping() {
-  const el = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg assistant'; div.id = 'typing-indicator';
-  div.innerHTML = '<div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>';
-  el.appendChild(div); el.scrollTop = el.scrollHeight;
+
+// ── LINKS ─────────────────────────────────────────────────────────────
+function renderLinksPanel(){
+  return `<div class="ph"><div class="pt">🔗 Links <span class="badge">${state.links.length}</span></div><button class="hbtn" onclick="openAddLink()">+ Add</button></div>
+    <div class="panel-body">
+      ${state.links.length?state.links.map((l,i)=>`<div class="litem">
+        <span style="font-size:15px">🔗</span>
+        <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${l.title||l.url}</div><a href="${l.url}" target="_blank" style="color:var(--blue);font-size:11px;text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.url}</a></div>
+        ${l.tag?`<span class="tag work" style="flex-shrink:0">${l.tag}</span>`:''}
+        <div class="ia" style="opacity:1"><button class="iab" onclick="delLink(${i})">×</button></div>
+      </div>`).join(''):'<div class="empty">No saved links yet</div>'}
+    </div>`;
 }
-function hideTyping() { const el = document.getElementById('typing-indicator'); if (el) el.remove(); }
 
-async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const apiKey = getApiKey();
-  if (!apiKey) { addMsg('assistant', '⚠️ Please add your Anthropic API key first.'); return; }
+// ── NOTES ─────────────────────────────────────────────────────────────
+function renderNotesPanel(){
+  const tabs=Object.keys(state.notes);
+  if(!tabs.length){state.notes['General']='';saveState();}
+  const active=tabs[noteTab]||tabs[0];
+  return `<div class="ph"><div class="pt">📝 Notes</div><button class="hbtn" onclick="addNoteTab()">+ Tab</button></div>
+    <div class="ntabs">${tabs.map((t,i)=>`<div class="ntab ${i===noteTab?'on':''}" onclick="switchNoteTab(${i})">${t}${tabs.length>1?`<span class="cx" onclick="event.stopPropagation();delNoteTab('${t}')">×</span>`:''}</div>`).join('')}</div>
+    <textarea class="narea" placeholder="Start typing..." onchange="saveNote('${active}',this.value)" oninput="saveNote('${active}',this.value)">${state.notes[active]||''}</textarea>`;
+}
 
-  // Handle "send digest" intent directly
-  if (/send.*(digest|email|daily)/i.test(text)) {
-    input.value = ''; input.style.height = 'auto';
-    addMsg('user', text);
-    addMsg('assistant', `Sending your digest to ${DIGEST_EMAIL}...`);
-    await sendDigestEmail('chat');
+// ── PROJECT PAGES ─────────────────────────────────────────────────────
+function renderProject(id){
+  const p=state.projects.find(x=>x.id===id);
+  if(!p){curPage='home';render();return;}
+  const area=document.getElementById('main-area');
+  const todos=p.todos||[];
+  const active=todos.filter(t=>!t.done);
+  const tNow=new Date();tNow.setHours(0,0,0,0);
+  const evs=p.events||[];
+  const upcoming=[...evs].filter(e=>new Date(e.date+'T00:00:00')>=tNow).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const tl=p.timeline||[];
+  area.innerHTML=`<div class="proj-grid">
+    <div class="panel">
+      <div class="ph"><div class="pt">✅ ${p.name} Tasks <span class="badge">${active.length}</span></div><button class="hbtn" onclick="openAddTodo('${id}')">+ Add</button></div>
+      <div class="panel-body">${sortedTodos(todos).map(t=>todoItem(t,todos.indexOf(t),id)).join('')||'<div class="empty">No tasks yet</div>'}</div>
+    </div>
+    <div class="panel">
+      <div class="ph"><div class="pt">📅 Events <span class="badge">${evs.length}</span></div><button class="hbtn" onclick="openAddEvent('${id}')">+ Event</button></div>
+      <div class="panel-body">${upcoming.map(e=>{const d=new Date(e.date+'T00:00:00');const diff=Math.round((d-tNow)/86400000);const when=diff===0?'Today':diff===1?'Tomorrow':d.toLocaleDateString('en-US',{month:'short',day:'numeric'});return`<div class="item"><div class="dot b"></div><div class="ib"><div class="it">${e.title}</div><div class="im">${when}${e.time?' · '+e.time:''}</div></div><div class="ia"><button class="iab" onclick="delEvent(${evs.indexOf(e)},'${id}')">×</button></div></div>`;}).join('')||'<div class="empty">No events yet</div>'}</div>
+    </div>
+    <div class="panel col-span2">
+      <div class="ph"><div class="pt">📍 Timeline</div><button class="hbtn" onclick="openAddTimeline('${id}')">+ Milestone</button></div>
+      <div class="tl">${tl.map((item,i)=>`<div class="tli">
+        <div class="tld ${item.done?'done':''}" onclick="togTl('${id}',${i})" title="Toggle"></div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500;${item.done?'text-decoration:line-through;color:var(--faint)':''}">${item.title}</div><div style="font-size:11px;color:var(--faint);margin-top:2px">${item.date?fmtDate(item.date):''}${item.desc?' · '+item.desc:''}</div></div>
+        <div class="ia" style="opacity:1"><button class="iab" onclick="delTl('${id}',${i})">×</button></div>
+      </div>`).join('')||'<div class="empty">No milestones yet</div>'}</div>
+    </div>
+  </div>`;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────
+function switchPage(id){
+  curPage=id;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  render();
+}
+function prevM(){calM--;if(calM<0){calM=11;calY--;}render();}
+function nextM(){calM++;if(calM>11){calM=0;calY++;}render();}
+function selDay(ds){calSel=calSel===ds?null:ds;render();}
+function prevDay(ds){const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()-1);calSel=d.toISOString().split('T')[0];render();}
+function nextDay(ds){const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+1);calSel=d.toISOString().split('T')[0];render();}
+function setSort(s){todoSort=s;render();}
+function switchNoteTab(i){noteTab=i;render();}
+
+// ── CRUD helpers ──────────────────────────────────────────────────────
+function getScope(s){if(s==='home')return state;return state.projects.find(p=>p.id===s)||state;}
+function togTodo(i,s){const t=getScope(s);if(t.todos[i])t.todos[i].done=!t.todos[i].done;saveState();render();}
+function delTodo(i,s){getScope(s).todos.splice(i,1);saveState();render();}
+function cycPri(i,s){const o=['','high','med','low'];const t=getScope(s).todos[i];if(!t)return;t.priority=o[(o.indexOf(t.priority)+1)%o.length];saveState();render();}
+function clearDone(s){const t=getScope(s);t.todos=t.todos.filter(x=>!x.done);saveState();render();}
+function delEvent(i,s){getScope(s).events.splice(i,1);saveState();render();}
+function delReminder(i){state.reminders.splice(i,1);saveState();render();}
+function delFu(i){state.followups.splice(i,1);saveState();render();}
+function markFuDone(i){state.followups[i].status='done';saveState();render();}
+function delLink(i){state.links.splice(i,1);saveState();render();}
+function delBlock(ds,i){if(state.timeBlocks[ds])state.timeBlocks[ds].splice(i,1);saveState();render();}
+function saveNote(tab,v){state.notes[tab]=v;saveState();}
+function addNoteTab(){const n=prompt('Tab name:');if(!n)return;state.notes[n]='';noteTab=Object.keys(state.notes).length-1;saveState();render();}
+function delNoteTab(t){if(!confirm(`Delete "${t}"?`))return;delete state.notes[t];noteTab=0;saveState();render();}
+function togTl(pid,i){const p=state.projects.find(x=>x.id===pid);if(p&&p.timeline[i])p.timeline[i].done=!p.timeline[i].done;saveState();render();}
+function delTl(pid,i){const p=state.projects.find(x=>x.id===pid);if(p)p.timeline.splice(i,1);saveState();render();}
+function addProject(){const n=prompt('Project name:');if(!n)return;const id='p'+Date.now();state.projects.push({id,name:n,todos:[],events:[],timeline:[]});saveState();switchPage(id);}
+function delProject(id){if(!confirm('Delete project?'))return;state.projects=state.projects.filter(p=>p.id!==id);if(curPage===id)curPage='home';saveState();render();}
+
+// ── EDIT MODALS ───────────────────────────────────────────────────────
+function editTodo(i,s){
+  const t=getScope(s).todos[i];if(!t)return;
+  openModal(`<h3>Edit task</h3>
+    <div class="fr"><label class="fl">Task</label><input class="fi" id="et-t" value="${t.text.replace(/"/g,'&quot;')}"/></div>
+    <div class="fr"><label class="fl">Due date</label><input class="fi" type="date" id="et-d" value="${t.due||''}"/></div>
+    <div class="fr"><label class="fl">Priority</label><select class="fsel" id="et-p"><option value="">None</option><option value="high" ${t.priority==='high'?'selected':''}>High</option><option value="med" ${t.priority==='med'?'selected':''}>Medium</option><option value="low" ${t.priority==='low'?'selected':''}>Low</option></select></div>
+    <div class="fr"><label class="fl">Category</label><select class="fsel" id="et-c"><option value="">None</option><option value="work" ${t.category==='work'?'selected':''}>Work</option><option value="personal" ${t.category==='personal'?'selected':''}>Personal</option><option value="health" ${t.category==='health'?'selected':''}>Health</option></select></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="saveEditTodo(${i},'${s}')">Save</button></div>`);
+}
+function saveEditTodo(i,s){
+  const t=getScope(s).todos[i];
+  t.text=document.getElementById('et-t').value.trim()||t.text;
+  t.due=document.getElementById('et-d').value;
+  t.priority=document.getElementById('et-p').value;
+  t.category=document.getElementById('et-c').value;
+  saveState();closeModal();render();
+}
+function openAddTodo(s){
+  openModal(`<h3>Add task</h3>
+    <div class="fr"><label class="fl">Task</label><input class="fi" id="at-t" placeholder="What needs to be done?" autofocus/></div>
+    <div class="fr"><label class="fl">Due date</label><input class="fi" type="date" id="at-d"/></div>
+    <div class="fr"><label class="fl">Priority</label><select class="fsel" id="at-p"><option value="">None</option><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div>
+    <div class="fr"><label class="fl">Category</label><select class="fsel" id="at-c"><option value="">None</option><option value="work">Work</option><option value="personal">Personal</option><option value="health">Health</option></select></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitTodo('${s}')">Add</button></div>`);
+  setTimeout(()=>document.getElementById('at-t')?.focus(),50);
+}
+function submitTodo(s){
+  const t=document.getElementById('at-t').value.trim();if(!t)return;
+  getScope(s).todos.push({text:t,due:document.getElementById('at-d').value,priority:document.getElementById('at-p').value,category:document.getElementById('at-c').value,done:false});
+  saveState();closeModal();render();
+}
+function openAddEvent(s){
+  openModal(`<h3>Add event</h3>
+    <div class="fr"><label class="fl">Title</label><input class="fi" id="ae-t" placeholder="Event name" autofocus/></div>
+    <div class="fr"><label class="fl">Date</label><input class="fi" type="date" id="ae-d" value="${calSel||''}"/></div>
+    <div class="fr"><label class="fl">Time</label><input class="fi" type="time" id="ae-ti"/></div>
+    <div class="fr"><label class="fl">Location</label><input class="fi" id="ae-l" placeholder="Optional"/></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitEvent('${s}')">Add</button></div>`);
+}
+function submitEvent(s){
+  const t=document.getElementById('ae-t').value.trim();const d=document.getElementById('ae-d').value;if(!t||!d)return;
+  getScope(s).events.push({title:t,date:d,time:document.getElementById('ae-ti').value,location:document.getElementById('ae-l').value});
+  saveState();closeModal();render();
+}
+function openAddReminder(){
+  openModal(`<h3>Add reminder</h3>
+    <div class="fr"><label class="fl">Reminder</label><input class="fi" id="ar-t" placeholder="What to remember?" autofocus/></div>
+    <div class="fr"><label class="fl">When (text)</label><input class="fi" id="ar-w" placeholder="e.g. Monday 9am"/></div>
+    <div class="fr"><label class="fl">Date & time for notification</label><input class="fi" type="datetime-local" id="ar-dt"/></div>
+    <div class="fr" style="display:flex;align-items:center;gap:8px"><label class="toggle"><input type="checkbox" id="ar-n"><span class="ts"></span></label><span style="font-size:13px">Browser notification</span></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitReminder()">Add</button></div>`);
+}
+function submitReminder(){
+  const t=document.getElementById('ar-t').value.trim();if(!t)return;
+  const notify=document.getElementById('ar-n').checked;
+  const dt=document.getElementById('ar-dt').value;
+  state.reminders.push({text:t,when:document.getElementById('ar-w').value,notify,dt});
+  if(notify&&dt)scheduleNotif(t,new Date(dt));
+  saveState();closeModal();render();
+}
+function openAddFollowup(){
+  openModal(`<h3>Add follow-up</h3>
+    <div class="fr"><label class="fl">What to follow up on?</label><input class="fi" id="af-t" placeholder="e.g. Waiting on proposal feedback" autofocus/></div>
+    <div class="fr"><label class="fl">Person / company</label><input class="fi" id="af-p" placeholder="Optional"/></div>
+    <div class="fr"><label class="fl">Follow-up by</label><input class="fi" type="date" id="af-d"/></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitFollowup()">Add</button></div>`);
+}
+function submitFollowup(){
+  const t=document.getElementById('af-t').value.trim();if(!t)return;
+  state.followups.push({text:t,person:document.getElementById('af-p').value,dueDate:document.getElementById('af-d').value,status:'waiting'});
+  saveState();closeModal();render();
+}
+function openAddLink(){
+  openModal(`<h3>Save link</h3>
+    <div class="fr"><label class="fl">URL</label><input class="fi" id="al-u" placeholder="https://..." autofocus/></div>
+    <div class="fr"><label class="fl">Title</label><input class="fi" id="al-t" placeholder="Optional label"/></div>
+    <div class="fr"><label class="fl">Tag</label><input class="fi" id="al-tg" placeholder="e.g. work, design, docs"/></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitLink()">Save</button></div>`);
+}
+function submitLink(){
+  const u=document.getElementById('al-u').value.trim();if(!u)return;
+  state.links.push({url:u,title:document.getElementById('al-t').value,tag:document.getElementById('al-tg').value});
+  saveState();closeModal();render();
+}
+function openAddBlock(ds,h){
+  openModal(`<h3>Add time block</h3>
+    <div class="fr"><label class="fl">Title</label><input class="fi" id="ab-t" placeholder="What are you blocking time for?" autofocus/></div>
+    <div class="fr"><label class="fl">Hour</label><select class="fsel" id="ab-h">${Array.from({length:13},(_,i)=>{const hr=i+7;const l=hr===12?'12pm':hr>12?`${hr-12}pm`:`${hr}am`;return`<option value="${hr}" ${h===hr?'selected':''}>${l}</option>`;}).join('')}</select></div>
+    <div class="fr"><label class="fl">Duration</label><select class="fsel" id="ab-d"><option value="1">1h</option><option value="2">2h</option><option value="3">3h</option><option value="4">4h</option></select></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitBlock('${ds}')">Add</button></div>`);
+}
+function submitBlock(ds){
+  const t=document.getElementById('ab-t').value.trim();if(!t)return;
+  if(!state.timeBlocks[ds])state.timeBlocks[ds]=[];
+  state.timeBlocks[ds].push({title:t,hour:parseInt(document.getElementById('ab-h').value),duration:parseInt(document.getElementById('ab-d').value)});
+  saveState();closeModal();render();
+}
+function openAddTimeline(pid){
+  openModal(`<h3>Add milestone</h3>
+    <div class="fr"><label class="fl">Milestone</label><input class="fi" id="atl-t" autofocus/></div>
+    <div class="fr"><label class="fl">Date</label><input class="fi" type="date" id="atl-d"/></div>
+    <div class="fr"><label class="fl">Notes</label><input class="fi" id="atl-n" placeholder="Optional"/></div>
+    <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitTl('${pid}')">Add</button></div>`);
+}
+function submitTl(pid){
+  const t=document.getElementById('atl-t').value.trim();if(!t)return;
+  const p=state.projects.find(x=>x.id===pid);
+  if(!p.timeline)p.timeline=[];
+  p.timeline.push({title:t,date:document.getElementById('atl-d').value,desc:document.getElementById('atl-n').value,done:false});
+  saveState();closeModal();render();
+}
+function openModal(html){document.getElementById('mc').innerHTML=html;document.getElementById('modal').style.display='flex';}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────
+function requestNotifications(){
+  if(!('Notification'in window)){showToast('Not supported in this browser');return;}
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){showToast('🔔 Notifications enabled!');document.getElementById('notif-btn').textContent='🔔 On';}
+    else showToast('Notifications blocked in browser settings');
+  });
+}
+function scheduleNotif(text,date){
+  const ms=date-new Date();if(ms<=0)return;
+  setTimeout(()=>{if(Notification.permission==='granted')new Notification('Dashboard reminder',{body:text});},ms);
+}
+
+// ── API KEY ───────────────────────────────────────────────────────────
+function saveKey(){const k=document.getElementById('api-in').value.trim();if(!k)return;localStorage.setItem('mydash-key',k);updateKeyStatus();showToast('API key saved!');addBotMsg('API key saved! Try your request.');}
+function showKeyInput(){document.getElementById('ki-area').style.display='block';document.getElementById('upd-key-btn').style.display='none';}
+function getKey(){return localStorage.getItem('mydash-key')||'';}
+function updateKeyStatus(){
+  const k=getKey();const el=document.getElementById('ks');const ki=document.getElementById('ki-area');const ub=document.getElementById('upd-key-btn');
+  if(k){el.textContent='✓ '+k.substring(0,14)+'...';el.className='ks ok';ki.style.display='none';ub.style.display='block';}
+  else{el.textContent='No key saved';el.className='ks bad';ki.style.display='block';ub.style.display='none';}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────
+function showToast(m,d=3000){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d);}
+
+// ── EMAIL DIGEST ──────────────────────────────────────────────────────
+function buildEmail(){
+  const today=new Date();const ts=today.toISOString().split('T')[0];
+  const tom=new Date(today);tom.setDate(tom.getDate()+1);const toms=tom.toISOString().split('T')[0];
+  const active=state.todos.filter(t=>!t.done);
+  const pO={high:0,med:1,low:2,'':3};active.sort((a,b)=>(pO[a.priority]||3)-(pO[b.priority]||3));
+  const pC={high:'#8a2222',med:'#8a5a00',low:'#2d5a3d','':'#7a756e'};
+  const pB={high:'#fceaea',med:'#fdf3e0',low:'#e8f0eb','':'#f0ede8'};
+  const trows=active.length?active.map(t=>`<tr><td style="padding:7px 0;border-bottom:1px solid #e2ddd6;font-size:14px">☐ ${t.text}${t.priority?`<span style="display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;background:${pB[t.priority]};color:${pC[t.priority]};margin-left:6px">${t.priority}</span>`:''}</td><td style="padding:7px 0;border-bottom:1px solid #e2ddd6;font-size:11px;color:#b0aba3;text-align:right">${t.due?fmtDate(t.due):''}</td></tr>`).join(''):`<tr><td colspan="2" style="padding:12px;text-align:center;color:#b0aba3;font-size:13px">No open tasks 🎉</td></tr>`;
+  const fuRows=state.followups.filter(f=>f.status!=='done').map(f=>`<tr><td style="padding:7px 0;border-bottom:1px solid #e2ddd6;font-size:14px">↩️ ${f.text}</td><td style="padding:7px 0;border-bottom:1px solid #e2ddd6;font-size:11px;color:#b0aba3;text-align:right">${f.person||''}${f.dueDate?' · '+fmtDate(f.dueDate):''}</td></tr>`).join('');
+  const evBlock=(evs,label)=>evs.length?`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7a756e;margin-bottom:5px">${label}</div>${evs.map(e=>`<div style="padding:6px 0;border-bottom:1px solid #e2ddd6;font-size:14px">📅 ${e.title}${e.time?` · <span style="color:#7a756e">${e.time}</span>`:''}</div>`).join('')}</div>`:'';
+  const te=state.events.filter(e=>e.date===ts);const tome=state.events.filter(e=>e.date===toms);
+  const upe=state.events.filter(e=>{const d=new Date(e.date+'T00:00:00');const diff=Math.round((d-today)/86400000);return diff>1&&diff<=7;}).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const dateLabel=today.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  return`<!DOCTYPE html><html><body style="margin:0;padding:0;background:#f5f3ef;font-family:Arial,sans-serif"><table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ef;padding:28px 16px"><tr><td align="center"><table width="580" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;border:1px solid #e2ddd6;overflow:hidden"><tr><td style="background:#2d5a3d;padding:20px 28px"><div style="font-size:18px;font-weight:600;color:#fff">mydashboard</div><div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:3px">${dateLabel}</div></td></tr><tr><td style="padding:22px 28px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7a756e;margin-bottom:10px">Tasks (${active.length} open)</div><table width="100%">${trows}</table></td></tr>${fuRows?`<tr><td style="padding:18px 28px 0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7a756e;margin-bottom:10px">Follow-ups</div><table width="100%">${fuRows}</table></td></tr>`:''}<tr><td style="padding:18px 28px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:#7a756e;margin-bottom:10px">Calendar</div>${evBlock(te,'Today')||evBlock(tome,'Tomorrow')||evBlock(upe,'This week')||'<div style="font-size:13px;color:#b0aba3">No upcoming events</div>'}</td></tr><tr><td style="background:#f0ede8;padding:12px 28px;border-top:1px solid #e2ddd6"><div style="font-size:11px;color:#b0aba3;text-align:center">Your personal dashboard · Have a great day! 🌱</div></td></tr></table></td></tr></table></body></html>`;
+}
+async function sendDigestEmail(src){
+  // Check EmailJS is configured
+  const ejsService=localStorage.getItem('mydash-ejs-service');
+  const ejsTemplate=localStorage.getItem('mydash-ejs-template');
+  const ejsKey=localStorage.getItem('mydash-ejs-key');
+  if(!ejsService||!ejsTemplate||!ejsKey){
+    showToast('Set up EmailJS first — click ✉ Digest');
+    openEmailJSSetup();
     return;
   }
-
-  input.value = ''; input.style.height = 'auto';
-  addMsg('user', text);
-  document.getElementById('send-btn').disabled = true;
-  showTyping();
-
-  const systemPrompt = `You are a dashboard assistant. The user's dashboard has todos, reminders, and calendar events.
-Current state:
-${JSON.stringify(state, null, 2)}
-
-Today: ${new Date().toISOString().split('T')[0]}
-
-Respond ALWAYS in this format:
-ACTIONS:
-[list of action objects]
-END_ACTIONS
-Short friendly message.
-
-Action types:
-{"action":"addTodo","text":"...","due":"YYYY-MM-DD or ''","priority":"high|med|low|''","category":"work|personal|health|''","done":false}
-{"action":"addReminder","text":"...","when":"...or ''"}
-{"action":"addEvent","title":"...","date":"YYYY-MM-DD","time":"...or ''","location":"...or ''","category":"work|personal|health|''"}
-{"action":"deleteTodo","index":N}
-{"action":"deleteReminder","index":N}
-{"action":"deleteEvent","index":N}
-{"action":"toggleTodo","index":N}
-{"action":"clearDoneTodos"}
-
-No changes? Use ACTIONS:[]END_ACTIONS. Dates must be YYYY-MM-DD.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: text }]
-      })
-    });
-
-    const data = await res.json(); hideTyping();
-    if (data.error) { addMsg('assistant', `⚠️ ${data.error.message}`); document.getElementById('send-btn').disabled = false; return; }
-
-    const reply = data.content[0].text;
-    const actionMatch = reply.match(/ACTIONS:\s*(\[[\s\S]*?\])\s*END_ACTIONS/);
-    if (actionMatch) {
-      try {
-        const actions = JSON.parse(actionMatch[1]);
-        actions.forEach(a => {
-          if (a.action === 'addTodo') state.todos.push({ text:a.text, due:a.due||'', priority:a.priority||'', category:a.category||'', done:false });
-          else if (a.action === 'addReminder') state.reminders.push({ text:a.text, when:a.when||'' });
-          else if (a.action === 'addEvent') state.events.push({ title:a.title, date:a.date, time:a.time||'', location:a.location||'', category:a.category||'' });
-          else if (a.action === 'deleteTodo' && a.index >= 0) state.todos.splice(a.index, 1);
-          else if (a.action === 'deleteReminder' && a.index >= 0) state.reminders.splice(a.index, 1);
-          else if (a.action === 'deleteEvent' && a.index >= 0) state.events.splice(a.index, 1);
-          else if (a.action === 'toggleTodo' && a.index >= 0) state.todos[a.index].done = !state.todos[a.index].done;
-          else if (a.action === 'clearDoneTodos') state.todos = state.todos.filter(t => !t.done);
-        });
-        saveState(); render();
-      } catch(e) {}
+  const btn=document.getElementById('digest-btn');btn.disabled=true;btn.textContent='Sending...';
+  try{
+    const subj='Your daily dashboard · '+new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    // Load EmailJS SDK if not loaded
+    if(!window.emailjs){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+        s.onload=res;s.onerror=rej;document.head.appendChild(s);
+      });
     }
-    const cleanReply = reply.replace(/ACTIONS:[\s\S]*?END_ACTIONS/, '').trim();
-    if (cleanReply) addMsg('assistant', cleanReply);
-  } catch(e) {
-    hideTyping();
-    addMsg('assistant', '⚠️ Could not reach the API. Check your key and connection.');
+    emailjs.init({publicKey:ejsKey});
+    await emailjs.send(ejsService,ejsTemplate,{
+      to_email:EMAIL,
+      subject:subj,
+      message_html:buildEmail(),
+      to_name:'Aidan',
+      from_name:'My Dashboard'
+    });
+    localStorage.setItem('mydash-lastdig',new Date().toISOString());
+    updateDigestInfo();
+    showToast('✉ Digest sent to '+EMAIL+'!');
+    if(src==='chat')addBotMsg('Digest sent to '+EMAIL+'!');
+  }catch(e){
+    console.error(e);
+    showToast('Failed to send: '+e.text||e.message||'Check EmailJS setup');
   }
-  document.getElementById('send-btn').disabled = false;
+  btn.disabled=false;btn.textContent='✉ Digest';
 }
 
-// ── Init ───────────────────────────────────────────────────────────────
-loadState();
-if (getApiKey()) document.getElementById('api-setup-area').style.display = 'none';
-updateApiKeyStatus();
-render();
-scheduleDigest();
-setInterval(updateDigestStatus, 60000);
+function openEmailJSSetup(){
+  openModal(`<h3>📧 Email Setup (EmailJS)</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+      EmailJS lets the dashboard send emails directly from the browser for free.<br><br>
+      <strong>Quick setup (5 min, free):</strong><br>
+      1. Go to <a href="https://emailjs.com" target="_blank" style="color:var(--blue)">emailjs.com</a> → Sign up free<br>
+      2. <strong>Email Services</strong> → Add Service → connect your Gmail → copy the <em>Service ID</em><br>
+      3. <strong>Email Templates</strong> → Create Template → use these variables:<br>
+      <code style="font-size:11px;background:var(--surface2);padding:2px 5px;border-radius:4px">{{subject}}</code> <code style="font-size:11px;background:var(--surface2);padding:2px 5px;border-radius:4px">{{message_html}}</code> <code style="font-size:11px;background:var(--surface2);padding:2px 5px;border-radius:4px">{{to_email}}</code> → copy the <em>Template ID</em><br>
+      4. <strong>Account</strong> → copy your <em>Public Key</em>
+    </p>
+    <div class="fr"><label class="fl">Service ID</label><input class="fi" id="ejs-svc" placeholder="service_xxxxxxx" value="${localStorage.getItem('mydash-ejs-service')||''}"/></div>
+    <div class="fr"><label class="fl">Template ID</label><input class="fi" id="ejs-tpl" placeholder="template_xxxxxxx" value="${localStorage.getItem('mydash-ejs-template')||''}"/></div>
+    <div class="fr"><label class="fl">Public Key</label><input class="fi" id="ejs-key" placeholder="xxxxxxxxxxxxxxxxxxxxxx" value="${localStorage.getItem('mydash-ejs-key')||''}"/></div>
+    <div class="ma">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn p" onclick="saveEmailJS()">Save & test</button>
+    </div>`);
+}
+
+async function saveEmailJS(){
+  const svc=document.getElementById('ejs-svc').value.trim();
+  const tpl=document.getElementById('ejs-tpl').value.trim();
+  const key=document.getElementById('ejs-key').value.trim();
+  if(!svc||!tpl||!key){showToast('Fill in all three fields');return;}
+  localStorage.setItem('mydash-ejs-service',svc);
+  localStorage.setItem('mydash-ejs-template',tpl);
+  localStorage.setItem('mydash-ejs-key',key);
+  closeModal();
+  showToast('Saved! Sending test email...');
+  await sendDigestEmail('test');
+}
+function sendDigestNow(){sendDigestEmail('button');}
+function toggleDigest(){
+  const on=document.getElementById('dtoggle').checked;
+  if(on){localStorage.setItem('mydash-dige','1');scheduleDigest();showToast('8am digest enabled');}
+  else{localStorage.removeItem('mydash-dige');if(digestTimer){clearTimeout(digestTimer);digestTimer=null;}showToast('Digest disabled');}
+  updateDigestInfo();
+}
+function msTo8(){const n=new Date();const x=new Date(n);x.setHours(8,0,0,0);if(x<=n)x.setDate(x.getDate()+1);return x-n;}
+function scheduleDigest(){
+  if(digestTimer){clearTimeout(digestTimer);digestTimer=null;}
+  if(!localStorage.getItem('mydash-dige'))return;
+  digestTimer=setTimeout(async()=>{
+    const last=localStorage.getItem('mydash-lastdig');const ts=new Date().toISOString().split('T')[0];
+    if(!last||!last.startsWith(ts))await sendDigestEmail('scheduler');
+    scheduleDigest();
+  },msTo8());
+}
+function updateDigestInfo(){
+  const on=!!localStorage.getItem('mydash-dige');
+  const t=document.getElementById('dtoggle');if(t)t.checked=on;
+  const di=document.getElementById('di');const ls=document.getElementById('ls');
+  if(di){if(on){const ms=msTo8();di.textContent='Next in '+Math.floor(ms/3600000)+'h '+Math.floor((ms%3600000)/60000)+'m';}else di.textContent='Toggle to enable';}
+  const l=localStorage.getItem('mydash-lastdig');
+  if(ls&&l){const d=new Date(l);ls.textContent='Last: '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});}
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────
+function addBotMsg(text){addChatMsg('a',text);}
+function addChatMsg(role,text){
+  const el=document.getElementById('msgs');
+  const d=document.createElement('div');d.className='msg '+role;
+  d.innerHTML='<div class="mb">'+text.replace(/\n/g,'<br>')+'</div>';
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function showTyping(){const el=document.getElementById('msgs');const d=document.createElement('div');d.className='msg a';d.id='typ';d.innerHTML='<div class="mb"><div class="typing"><span></span><span></span><span></span></div></div>';el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function hideTyping(){const e=document.getElementById('typ');if(e)e.remove();}
+
+async function sendMsg(){
+  const inp=document.getElementById('ci');const text=inp.value.trim();if(!text)return;
+  const key=getKey();
+  if(!key){addBotMsg('Please add your API key first (bottom of sidebar).');return;}
+  if(/send.*(digest|email|daily)/i.test(text)){inp.value='';inp.style.height='auto';addChatMsg('u',text);addBotMsg('Sending digest to '+EMAIL+'...');await sendDigestEmail('chat');return;}
+  inp.value='';inp.style.height='auto';
+  addChatMsg('u',text);document.getElementById('csb').disabled=true;showTyping();
+  const sys='You are a dashboard assistant.\nState: '+JSON.stringify({todos:state.todos,reminders:state.reminders,events:state.events,followups:state.followups,links:state.links},null,2)+'\nToday: '+new Date().toISOString().split('T')[0]+'\n\nAlways respond:\nACTIONS:[...]END_ACTIONS\nFriendly message.\n\nActions:\n{"action":"addTodo","text":"...","due":"YYYY-MM-DD or empty","priority":"high|med|low or empty","category":"work|personal|health or empty"}\n{"action":"addReminder","text":"...","when":"...","notify":false,"dt":"YYYY-MM-DDTHH:MM or empty"}\n{"action":"addEvent","title":"...","date":"YYYY-MM-DD","time":"HH:MM or empty","location":"..."}\n{"action":"addFollowup","text":"...","person":"...","dueDate":"YYYY-MM-DD or empty"}\n{"action":"addLink","url":"...","title":"...","tag":"..."}\n{"action":"deleteTodo","index":N}\n{"action":"deleteReminder","index":N}\n{"action":"deleteEvent","index":N}\n{"action":"toggleTodo","index":N}\n{"action":"clearDoneTodos"}\nNo changes: ACTIONS:[]END_ACTIONS\nDates YYYY-MM-DD. notify:true if user says notify me.';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
+    const data=await res.json();hideTyping();
+    if(data.error){addBotMsg('Error: '+data.error.message);document.getElementById('csb').disabled=false;return;}
+    const reply=data.content[0].text;
+    const m=reply.match(/ACTIONS:\s*(\[[\s\S]*?\])\s*END_ACTIONS/);
+    if(m){try{
+      JSON.parse(m[1]).forEach(a=>{
+        if(a.action==='addTodo')state.todos.push({text:a.text,due:a.due||'',priority:a.priority||'',category:a.category||'',done:false});
+        else if(a.action==='addReminder'){const r={text:a.text,when:a.when||'',notify:a.notify||false,dt:a.dt||''};state.reminders.push(r);if(r.notify&&r.dt)scheduleNotif(r.text,new Date(r.dt));}
+        else if(a.action==='addEvent')state.events.push({title:a.title,date:a.date,time:a.time||'',location:a.location||''});
+        else if(a.action==='addFollowup')state.followups.push({text:a.text,person:a.person||'',dueDate:a.dueDate||'',status:'waiting'});
+        else if(a.action==='addLink')state.links.push({url:a.url,title:a.title||'',tag:a.tag||''});
+        else if(a.action==='deleteTodo'&&a.index>=0)state.todos.splice(a.index,1);
+        else if(a.action==='deleteReminder'&&a.index>=0)state.reminders.splice(a.index,1);
+        else if(a.action==='deleteEvent'&&a.index>=0)state.events.splice(a.index,1);
+        else if(a.action==='toggleTodo'&&a.index>=0)state.todos[a.index].done=!state.todos[a.index].done;
+        else if(a.action==='clearDoneTodos')state.todos=state.todos.filter(t=>!t.done);
+      });saveState();render();
+    }catch(e){}}
+    const clean=reply.replace(/ACTIONS:[\s\S]*?END_ACTIONS/,'').trim();
+    if(clean)addBotMsg(clean);
+  }catch(e){hideTyping();addBotMsg('Could not reach API. Check key and connection.');}
+  document.getElementById('csb').disabled=false;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+loadState();render();scheduleDigest();
+setInterval(updateDigestInfo,60000);
+if(Notification.permission==='granted')document.getElementById('notif-btn').textContent='🔔 On';
 </script>
 </body>
 </html>
