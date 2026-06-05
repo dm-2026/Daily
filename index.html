@@ -277,7 +277,7 @@ function todoItem(t,i,scope){
   return `<div class="item${over?' overdue':''}">
     <div class="cb ${t.done?'chk':''}" onclick="togTodo(${i},'${scope}')"></div>
     <div class="ib">
-      <div class="it ${t.done?'done':''}${over?' overdue-text':''}">${t.text}${t.priority?`<span class="tag ${t.priority}" onclick="cycPri(${i},'${scope}')" title="Change priority">${t.priority}</span>`:''}${t.category?`<span class="tag ${t.category}">${t.category}</span>`:''}</div>
+      <div class="it ${t.done?'done':''}${over?' overdue-text':''}">${t.text}${t.priority?`<span class="tag ${t.priority}" onclick="cycPri(${i},'${scope}')" title="Change priority">${t.priority}</span>`:''}${t.category?`<span class="tag ${t.category}">${t.category}</span>`:''}${t.projectTag?`<span class="tag" style="background:#f0eaf8;color:#5a3a8a;cursor:default" title="From project: ${t.projectTag}">📁 ${t.projectTag}</span>`:''}</div>
       ${t.due?`<div class="im">📅 ${fmtDate(t.due)}${over?` · <span style="color:var(--red);font-weight:600">Overdue</span>`:''}</div>`:''}
     </div>
     <div class="ia">
@@ -451,7 +451,24 @@ function switchNoteTab(i){noteTab=i;render();}
 
 // ── CRUD helpers ──────────────────────────────────────────────────────
 function getScope(s){if(s==='home')return state;return state.projects.find(p=>p.id===s)||state;}
-function togTodo(i,s){const t=getScope(s);if(t.todos[i])t.todos[i].done=!t.todos[i].done;saveState();render();}
+function togTodo(i,s){
+  const t=getScope(s);
+  if(!t.todos[i])return;
+  t.todos[i].done=!t.todos[i].done;
+  // Sync mirror on home if toggling a project todo
+  if(s!=='home'){
+    const todo=t.todos[i];
+    const mirror=state.todos.find(x=>x.projectId===s&&x.text===todo.text&&x.due===todo.due);
+    if(mirror)mirror.done=todo.done;
+  }
+  // Sync mirror's project copy if toggling a mirrored home todo
+  if(s==='home'&&t.todos[i].projectId){
+    const pid=t.todos[i].projectId;
+    const proj=state.projects.find(p=>p.id===pid);
+    if(proj){const match=proj.todos.find(x=>x.text===t.todos[i].text);if(match)match.done=t.todos[i].done;}
+  }
+  saveState();render();
+}
 function delTodo(i,s){getScope(s).todos.splice(i,1);saveState();render();}
 function cycPri(i,s){const o=['','high','med','low'];const t=getScope(s).todos[i];if(!t)return;t.priority=o[(o.indexOf(t.priority)+1)%o.length];saveState();render();}
 function clearDone(s){const t=getScope(s);t.todos=t.todos.filter(x=>!x.done);saveState();render();}
@@ -498,7 +515,13 @@ function openAddTodo(s){
 }
 function submitTodo(s){
   const t=document.getElementById('at-t').value.trim();if(!t)return;
-  getScope(s).todos.push({text:t,due:document.getElementById('at-d').value,priority:document.getElementById('at-p').value,category:document.getElementById('at-c').value,done:false});
+  const todo={text:t,due:document.getElementById('at-d').value,priority:document.getElementById('at-p').value,category:document.getElementById('at-c').value,done:false};
+  getScope(s).todos.push(todo);
+  // Mirror to home list with project tag
+  if(s!=='home'){
+    const proj=state.projects.find(p=>p.id===s);
+    if(proj) state.todos.push({...todo,projectTag:proj.name,projectId:s});
+  }
   saveState();closeModal();render();
 }
 function openAddEvent(s){
@@ -742,7 +765,14 @@ async function sendMsg(){
   if(/send.*(digest|email|daily)/i.test(text)){inp.value='';inp.style.height='auto';addChatMsg('u',text);addBotMsg('Sending digest to '+EMAIL+'...');await sendDigestEmail('chat');return;}
   inp.value='';inp.style.height='auto';
   addChatMsg('u',text);document.getElementById('csb').disabled=true;showTyping();
-  const sys='You are a dashboard assistant.\nState: '+JSON.stringify({todos:state.todos,reminders:state.reminders,events:state.events,followups:state.followups,links:state.links},null,2)+'\nToday: '+new Date().toISOString().split('T')[0]+'\n\nAlways respond:\nACTIONS:[...]END_ACTIONS\nFriendly message.\n\nActions:\n{"action":"addTodo","text":"...","due":"YYYY-MM-DD or empty","priority":"high|med|low or empty","category":"work|personal|health or empty"}\n{"action":"addReminder","text":"...","when":"...","notify":false,"dt":"YYYY-MM-DDTHH:MM or empty"}\n{"action":"addEvent","title":"...","date":"YYYY-MM-DD","time":"HH:MM or empty","location":"..."}\n{"action":"addFollowup","text":"...","person":"...","dueDate":"YYYY-MM-DD or empty"}\n{"action":"addLink","url":"...","title":"...","tag":"..."}\n{"action":"deleteTodo","index":N}\n{"action":"deleteReminder","index":N}\n{"action":"deleteEvent","index":N}\n{"action":"toggleTodo","index":N}\n{"action":"clearDoneTodos"}\nNo changes: ACTIONS:[]END_ACTIONS\nDates YYYY-MM-DD. notify:true if user says notify me.';
+  // Context-aware scope
+  const isProj=curPage!=='home';
+  const proj=isProj?state.projects.find(p=>p.id===curPage):null;
+  const scopeName=proj?proj.name:'Home';
+  const scopeTodos=proj?proj.todos:state.todos;
+  const scopeEvents=proj?proj.events:state.events;
+  const ctxState=isProj?{currentPage:scopeName,todos:scopeTodos,events:scopeEvents}:{currentPage:'Home',todos:state.todos,reminders:state.reminders,events:state.events,followups:state.followups,links:state.links};
+  const sys='You are a dashboard assistant. User is on the "'+scopeName+'" page.\nState: '+JSON.stringify(ctxState,null,2)+'\nToday: '+new Date().toISOString().split('T')[0]+'\n\nIMPORTANT: addTodo and addEvent go to the CURRENT page ("'+scopeName+'"). Reminders/followups/links always go to Home.\n\nAlways respond:\nACTIONS:[...]END_ACTIONS\nFriendly message.\n\nActions:\n{"action":"addTodo","text":"...","due":"YYYY-MM-DD or empty","priority":"high|med|low or empty","category":"work|personal|health or empty"}\n{"action":"addReminder","text":"...","when":"...","notify":false,"dt":"YYYY-MM-DDTHH:MM or empty"}\n{"action":"addEvent","title":"...","date":"YYYY-MM-DD","time":"HH:MM or empty","location":"..."}\n{"action":"addFollowup","text":"...","person":"...","dueDate":"YYYY-MM-DD or empty"}\n{"action":"addLink","url":"...","title":"...","tag":"..."}\n{"action":"addNote","tab":"tab name (use existing tab name or new one)","text":"content to add"}\n{"action":"deleteReminder","index":N}\n{"action":"deleteTodo","index":N}\n{"action":"deleteEvent","index":N}\n{"action":"toggleTodo","index":N}\n{"action":"clearDoneTodos"}\nNo changes: ACTIONS:[]END_ACTIONS\nDates YYYY-MM-DD. notify:true if user says notify me.';
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
     const data=await res.json();hideTyping();
@@ -751,16 +781,27 @@ async function sendMsg(){
     const m=reply.match(/ACTIONS:\s*(\[[\s\S]*?\])\s*END_ACTIONS/);
     if(m){try{
       JSON.parse(m[1]).forEach(a=>{
-        if(a.action==='addTodo')state.todos.push({text:a.text,due:a.due||'',priority:a.priority||'',category:a.category||'',done:false});
+        if(a.action==='addTodo'){
+          const td={text:a.text,due:a.due||'',priority:a.priority||'',category:a.category||'',done:false};
+          scopeTodos.push(td);
+          if(isProj&&proj){state.todos.push({...td,projectTag:proj.name,projectId:proj.id});}
+        }
+        else if(a.action==='addEvent') scopeEvents.push({title:a.title,date:a.date,time:a.time||'',location:a.location||''});
         else if(a.action==='addReminder'){const r={text:a.text,when:a.when||'',notify:a.notify||false,dt:a.dt||''};state.reminders.push(r);if(r.notify&&r.dt)scheduleNotif(r.text,new Date(r.dt));}
-        else if(a.action==='addEvent')state.events.push({title:a.title,date:a.date,time:a.time||'',location:a.location||''});
-        else if(a.action==='addFollowup')state.followups.push({text:a.text,person:a.person||'',dueDate:a.dueDate||'',status:'waiting'});
-        else if(a.action==='addLink')state.links.push({url:a.url,title:a.title||'',tag:a.tag||''});
-        else if(a.action==='deleteTodo'&&a.index>=0)state.todos.splice(a.index,1);
-        else if(a.action==='deleteReminder'&&a.index>=0)state.reminders.splice(a.index,1);
-        else if(a.action==='deleteEvent'&&a.index>=0)state.events.splice(a.index,1);
-        else if(a.action==='toggleTodo'&&a.index>=0)state.todos[a.index].done=!state.todos[a.index].done;
-        else if(a.action==='clearDoneTodos')state.todos=state.todos.filter(t=>!t.done);
+        else if(a.action==='addFollowup') state.followups.push({text:a.text,person:a.person||'',dueDate:a.dueDate||'',status:'waiting'});
+        else if(a.action==='addLink') state.links.push({url:a.url,title:a.title||'',tag:a.tag||''});
+        else if(a.action==='addNote'){
+          const tab=a.tab||'General';
+          if(!state.notes[tab])state.notes[tab]='';
+          state.notes[tab]+=(state.notes[tab]?'\n':'')+a.text;
+          // Switch to that note tab so user sees it
+          const tabIdx=Object.keys(state.notes).indexOf(tab);
+          if(tabIdx>=0)noteTab=tabIdx;
+        }
+        else if(a.action==='deleteTodo'&&a.index>=0) scopeTodos.splice(a.index,1);
+        else if(a.action==='deleteEvent'&&a.index>=0) scopeEvents.splice(a.index,1);
+        else if(a.action==='toggleTodo'&&a.index>=0) scopeTodos[a.index].done=!scopeTodos[a.index].done;
+        else if(a.action==='clearDoneTodos'){if(isProj)proj.todos=proj.todos.filter(t=>!t.done);else state.todos=state.todos.filter(t=>!t.done);}
       });saveState();render();
     }catch(e){}}
     const clean=reply.replace(/ACTIONS:[\s\S]*?END_ACTIONS/,'').trim();
