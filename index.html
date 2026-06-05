@@ -642,16 +642,25 @@ function togTodo(i,s){
 function delTodo(i,s){
   const todo=getScope(s).todos[i];
   if(!todo)return;
-  // Delete from target scope
-  getScope(s).todos.splice(i,1);
-  // If deleting from a project, also remove the mirror on home
-  if(s!=='home'){
-    state.todos=state.todos.filter(x=>!(x.projectId===s&&x.text===todo.text&&x.due===todo.due));
+  // Remove matching calendar entry
+  if(todo.due){
+    const evts=getScope(s).events;
+    const idx=evts.findIndex(e=>e._fromTodo&&e.date===todo.due&&e.title===todo.text);
+    if(idx>=0)evts.splice(idx,1);
   }
-  // If deleting from home and it's a mirrored item, also remove from the project
+  getScope(s).todos.splice(i,1);
+  if(s!=='home'){
+    // Remove home mirror todo
+    state.todos=state.todos.filter(x=>!(x.projectId===s&&x.text===todo.text&&x.due===todo.due));
+    // Remove home mirror calendar entry
+    if(todo.due)state.events=state.events.filter(e=>!(e._fromTodo&&e.date===todo.due&&e.title===todo.text));
+  }
   if(s==='home'&&todo.projectId){
     const proj=state.projects.find(p=>p.id===todo.projectId);
-    if(proj)proj.todos=proj.todos.filter(x=>!(x.text===todo.text&&x.due===todo.due));
+    if(proj){
+      proj.todos=proj.todos.filter(x=>!(x.text===todo.text&&x.due===todo.due));
+      if(todo.due)proj.events=proj.events.filter(e=>!(e._fromTodo&&e.date===todo.due&&e.title===todo.text));
+    }
   }
   saveState();render();
 }
@@ -698,14 +707,26 @@ function openAddTodo(s){
     <div class="ma"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn p" onclick="submitTodo('${s}')">Add</button></div>`);
   setTimeout(()=>document.getElementById('at-t')?.focus(),50);
 }
+function addTodoToCalendar(todo, scope){
+  if(!todo.due) return;
+  const events = getScope(scope).events;
+  // avoid duplicates
+  const exists = events.find(e=>e.date===todo.due&&e.title===todo.text&&e._fromTodo);
+  if(!exists) events.push({title:todo.text,date:todo.due,time:'',location:'',category:todo.category||'',_fromTodo:true});
+}
+
 function submitTodo(s){
   const t=document.getElementById('at-t').value.trim();if(!t)return;
   const todo={text:t,due:document.getElementById('at-d').value,priority:document.getElementById('at-p').value,category:document.getElementById('at-c').value,done:false};
   getScope(s).todos.push(todo);
+  addTodoToCalendar(todo, s);
   // Mirror to home list with project tag
   if(s!=='home'){
     const proj=state.projects.find(p=>p.id===s);
-    if(proj) state.todos.push({...todo,projectTag:proj.name,projectId:s});
+    if(proj){
+      state.todos.push({...todo,projectTag:proj.name,projectId:s});
+      addTodoToCalendar({...todo,projectTag:proj.name,projectId:s},'home');
+    }
   }
   saveState();closeModal();render();
 }
@@ -969,7 +990,12 @@ async function sendMsg(){
         if(a.action==='addTodo'){
           const td={text:a.text,due:a.due||'',priority:a.priority||'',category:a.category||'',done:false};
           scopeTodos.push(td);
-          if(isProj&&proj){state.todos.push({...td,projectTag:proj.name,projectId:proj.id});}
+          addTodoToCalendar(td, curPage);
+          if(isProj&&proj){
+            const mirror={...td,projectTag:proj.name,projectId:proj.id};
+            state.todos.push(mirror);
+            addTodoToCalendar(mirror,'home');
+          }
         }
         else if(a.action==='addEvent') scopeEvents.push({title:a.title,date:a.date,time:a.time||'',location:a.location||''});
         else if(a.action==='addReminder'){const r={text:a.text,when:a.when||'',notify:a.notify||false,dt:a.dt||''};state.reminders.push(r);if(r.notify&&r.dt)scheduleNotif(r.text,new Date(r.dt));}
